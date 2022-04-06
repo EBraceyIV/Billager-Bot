@@ -40,6 +40,13 @@ async def cog_reload(ctx):
     await ctx.send("Cogs Reloaded. KACHOW!")
 
 
+@bot.command(name="sync", help="Sync the slash commands")
+async def sync(ctx):
+    await bot.tree.sync(guild=ctx.guild)
+    print("Slash commands synced: " + str(await bot.tree.fetch_commands(guild=ctx.guild)))
+    await ctx.send("Slashes synced.")
+
+
 @bot.command(name="ping")
 async def ping(ctx):
     await ctx.send("PONG!")
