@@ -21,6 +21,18 @@ bot = commands.Bot(command_prefix=['bb:', 'BB:', 'Bb:', 'Bb:'],
 async def on_ready():
     print('Billager has logged in as {0}.'.format(bot.user.name))
 
+    # Initialize BBux bank and user prize collections
+    bbux_bank = shelve.open("bbux_bank")
+    member_collections = shelve.open("member_collection")
+    for guild in bot.guilds:
+        for member in guild.members:
+            if member.mention not in bbux_bank:
+                bbux_bank[member.mention] = 0
+            if member.mention not in member_collections:
+                member_collections[member.mention] = {}
+    bbux_bank.close()
+    member_collections.close()
+
     # Breathe a bit of life into our creation with some fun activity
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="with his axe."))
 
