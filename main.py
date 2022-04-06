@@ -32,15 +32,41 @@ async def coms(ctx):
     await ctx.send(await bot.tree.fetch_commands(guild=ctx.guild))
 
 
+# In case there are any unforeseen issues, the cogs can all be reloaded by a mod/admin
+@bot.command(name="cogReload", help="Reload them cogs", hidden=True)
+@commands.check(commands.has_guild_permissions(manage_guild=True))
+async def cog_reload(ctx):
+    await cog_loader("reload")
+    await ctx.send("Cogs Reloaded. KACHOW!")
+
+
 @bot.command(name="ping")
 async def ping(ctx):
     await ctx.send("PONG!")
 
 
+# Function to load/reload cogs depending on whether the bot is starting up or if bb:cogreload has been used
+async def cog_loader(load_style):
+    # Load each cog included in the "cogs" directory
+    for cog in os.listdir("cogs"):
+        if cog.endswith(".py"):  # Safety check to not process any non-cog files
+            try:
+                # Load or reload, depending on the load_style defined
+                if load_style == "load":
+                    await bot.load_extension(f'cogs.{cog[:-3]}')
+                    print(f"Loaded cog: {cog}")
+                else:
+                    await bot.reload_extension(f'cogs.{cog[:-3]}')
+                    print(f"Reloaded cog: {cog}")
+            except Exception as e:  # Report any cog loading errors to the console
+                print("Couldn't load cog \"{0}\"".format(cog))
+                print("Error: {0}".format(e))
+
+
 async def main():
     async with bot:
         # Load the command cogs
-        # await cog_loader("load")
+        await cog_loader("load")
 
         # Start up the bot
         await bot.start(TOKEN)
