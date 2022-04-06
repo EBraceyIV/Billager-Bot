@@ -38,7 +38,7 @@ async def on_ready():
 
 
 # Print list of synced slash commands
-@bot.command(name="coms")
+@bot.command(name="coms", hidden=True)
 async def coms(ctx):
     print(await bot.tree.fetch_commands(guild=ctx.guild))
     await ctx.send(await bot.tree.fetch_commands(guild=ctx.guild))
@@ -52,14 +52,14 @@ async def cog_reload(ctx):
     await ctx.send("Cogs Reloaded. KACHOW!")
 
 
-@bot.command(name="sync", help="Sync the slash commands")
+@bot.command(name="sync", help="Sync the slash commands", hidden=True)
 async def sync(ctx):
     await bot.tree.sync(guild=ctx.guild)
     print("Slash commands synced: " + str(await bot.tree.fetch_commands(guild=ctx.guild)))
     await ctx.send("Slashes synced.")
 
 
-@bot.command(name="ping")
+@bot.command(name="ping", hidden=True)
 async def ping(ctx):
     await ctx.send("PONG!")
 
