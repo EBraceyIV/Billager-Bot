@@ -25,6 +25,13 @@ async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="with his axe."))
 
 
+# Print list of synced slash commands
+@bot.command(name="coms")
+async def coms(ctx):
+    print(await bot.tree.fetch_commands(guild=ctx.guild))
+    await ctx.send(await bot.tree.fetch_commands(guild=ctx.guild))
+
+
 @bot.command(name="ping")
 async def ping(ctx):
     await ctx.send("PONG!")
