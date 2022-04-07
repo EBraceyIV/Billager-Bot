@@ -66,14 +66,6 @@ class Lore(commands.Cog):
         embed = lore_access("retrieve", lore_title, None)
         await interaction.response.send_message(embed=embed)
 
-    @lore.autocomplete("lore_title")
-    async def lore_title_autocomplete(self,
-                                      interaction: discord.Interaction,
-                                      current: str) -> list[app_commands.Choice[str]]:
-        lore_titles = all_lore
-        return [app_commands.Choice(name=lore_title, value=lore_title)
-                for lore_title in lore_titles if current.lower() in lore_title.lower()]
-
     # Add a new piece of lore to the records
     @app_commands.command(name="add_lore",
                           description="Add a new piece of lore to the records. Title and then description.")
@@ -83,6 +75,34 @@ class Lore(commands.Cog):
         # The lore is stored as the type embed in the shelf file
         lore_access("add", lore_title, embed)
         await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="edit_lore",
+                          description="Edit a piece of lore on the records.")
+    async def edit_lore(self, interaction: discord.Interaction, lore_title: str, edit_field: str, edit_content: str):
+        if lore_title not in all_lore:
+            await interaction.response.send_message("Can't find that lore!")
+            return
+        # Load the embed object once we know it exists so it can be edited
+        embed = lore_access("retrieve", lore_title, None)
+
+        # if edit_field.lower() == "title":
+
+    @lore.autocomplete("lore_title")
+    @edit_lore.autocomplete("lore_title")
+    async def lore_title_autocomplete(self,
+                                      interaction: discord.Interaction,
+                                      current: str) -> list[app_commands.Choice[str]]:
+        lore_titles = all_lore
+        return [app_commands.Choice(name=lore_title, value=lore_title)
+                for lore_title in lore_titles if current.lower() in lore_title.lower()]
+
+    @edit_lore.autocomplete("edit_field")
+    async def edit_field_autocomplete(self,
+                                      interaction: discord.Interaction,
+                                      current: str) -> list[app_commands.Choice[str]]:
+        edit_fields = ["title", "content", "number"]
+        return [app_commands.Choice(name=edit_field, value=edit_field)
+                for edit_field in edit_fields if current.lower() in edit_field.lower()]
 
 
 async def setup(bot):
