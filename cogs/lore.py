@@ -85,7 +85,40 @@ class Lore(commands.Cog):
         # Load the embed object once we know it exists so it can be edited
         embed = lore_access("retrieve", lore_title, None)
 
-        # if edit_field.lower() == "title":
+        if edit_field.lower() == "title":
+            # Assign the edited embed to a new entry in lore_list and remove the old one
+            # Easiest way I could conjure of replacing the key of a shelve entry
+            embed.title = edit_content
+            lore_access("remove", lore_title, None)
+            lore_access("add", edit_content, embed)
+        elif edit_field.lower() == "content":
+            # Reassign the content and reassign the value to the key
+            embed.description = edit_content
+            lore_access("edit", lore_title, embed)
+        elif edit_field.lower() == "number":
+            # Validate that users have entered a valid number (int or float)
+            try:
+                edit_content = int(edit_content)
+            except ValueError:
+                try:
+                    edit_content = float(edit_content)
+                except ValueError:
+                    await interaction.response.send_message(
+                        "Since my brain is a computer, it'll help if you make that a number instead.")
+                    return
+                else:
+                    # Assign the manual ID number to the lore
+                    embed.set_author(name="Lore Nugget #" + str(edit_content))
+                    lore_access("edit", lore_title, embed)
+            else:
+                # Assign the manual ID number to the lore
+                embed.set_author(name="Lore Nugget #" + str(edit_content))
+                lore_access("edit", lore_title, embed)
+        else:
+            await interaction.response.send_message("That's not an editable field for the lore.")
+            return
+
+        await interaction.response.send_message(embed=embed)
 
     @lore.autocomplete("lore_title")
     @edit_lore.autocomplete("lore_title")
