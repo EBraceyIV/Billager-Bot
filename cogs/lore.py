@@ -55,8 +55,7 @@ class Lore(commands.Cog):
         self.bot = bot
 
     # Display the requested piece of lore, or a random piece if none is specified
-    @commands.command(name='lore', description="View some enjoyable server lore.",
-                      help="This is for lore reading.")
+    @app_commands.command(name='lore', description="View some enjoyable server lore.")
     async def lore(self, interaction: discord.Interaction, *, lore_title: typing.Optional[str]):
         lore_title = random.choice(all_lore) if lore_title is None else lore_title
         if lore_title not in all_lore:
@@ -65,6 +64,24 @@ class Lore(commands.Cog):
                 "that lore on record.")
             return
         embed = lore_access("retrieve", lore_title, None)
+        await interaction.response.send_message(embed=embed)
+
+    @lore.autocomplete("lore_title")
+    async def lore_title_autocomplete(self,
+                                      interaction: discord.Interaction,
+                                      current: str) -> list[app_commands.Choice[str]]:
+        lore_titles = all_lore
+        return [app_commands.Choice(name=lore_title, value=lore_title)
+                for lore_title in lore_titles if current.lower() in lore_title.lower()]
+
+    # Add a new piece of lore to the records
+    @app_commands.command(name="add_lore",
+                          description="Add a new piece of lore to the records. Title and then description.")
+    async def add_lore(self, interaction: discord.Interaction, lore_title: str, *, lore_description: str):
+        # Pass the relevant info to the embed builder
+        embed = embed_init(lore_title, lore_description)
+        # The lore is stored as the type embed in the shelf file
+        lore_access("add", lore_title, embed)
         await interaction.response.send_message(embed=embed)
 
 
