@@ -66,6 +66,22 @@ class Lore(commands.Cog):
         embed = lore_access("retrieve", lore_title, None)
         await interaction.response.send_message(embed=embed)
 
+    # Display a list of all lore currently stored
+    @app_commands.command(name="lore_list", description="See a list of all available lore.")
+    async def lore_list(self, interaction: discord.Interaction):
+        # Initialize the embed
+        embed = discord.Embed(title="Billager's Lore Compository", color=0x7289da)
+        embed.set_footer(text="More Lore? Tell BBot what needs to be remembered.")
+        # To iterate on the description for the embed, start as a normal string
+        description = "Here you can see the full archive of all lore currently on record.\n" \
+                      "Use `/lore <lore title>` to read more about any entry.\n\n" \
+                      "------------------------------\n\n"
+        # Then add each lore by title to the description
+        for lore_title in all_lore:
+            description = description + "> " + lore_title + "\n"
+        embed.description = description
+        await interaction.response.send_message(embed=embed)
+
     # Add a new piece of lore to the records
     @app_commands.command(name="add_lore",
                           description="Add a new piece of lore to the records. Title and then description.")
