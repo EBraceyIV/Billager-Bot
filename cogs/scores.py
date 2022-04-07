@@ -54,14 +54,16 @@ class Scores(commands.Cog, name="Scores"):
     # Let users subtract from other user's scores
     @app_commands.command(name="minus", description="Subtract from a user's score")
     async def minus(self, interaction: discord.Interaction, member: discord.Member, num: typing.Optional[int] = 1):
+        if member.mention not in scored_members:
+            score_func("init", member.mention, -num)
+        else:
+            score_func("subtract", member.mention, num)
         if member.mention == interaction.user.mention:
-            await interaction.response.send_message("I mean, if really want to...\n" +
+            await interaction.response.send_message("I mean, if really want to...")
+            await asyncio.sleep(2)
+            await interaction.edit_original_message(content="I mean, if you really want to...\n" +
                                                     member.display_name + " -" + str(num))
         else:
-            if member.mention not in scored_members:
-                score_func("init", member.mention, -num)
-            else:
-                score_func("subtract", member.mention, num)
             await interaction.response.send_message(str(member.display_name) + ' -' + str(num))
 
     # Show a scoreboard from highest to lowest for all users with a score
