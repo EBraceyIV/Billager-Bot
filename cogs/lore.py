@@ -136,6 +136,8 @@ class Lore(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
+    # AUTOCOM LIST ONLY SUPPORTS UP TO 25 ENTRIES
+    # SO THIS MAY NEED TO BE REMOVED OR FIXED WITH A WEIRD WORKAROUND
     @lore.autocomplete("lore_title")
     @edit_lore.autocomplete("lore_title")
     async def lore_title_autocomplete(self,
