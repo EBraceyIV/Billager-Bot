@@ -6,9 +6,33 @@ from discord import app_commands
 import TOKEN
 import shelve
 import asyncio
+import json
+import sys
 
-# TOKEN retrieved from a separate file
-TOKEN = TOKEN.TOKEN
+# # Load config to get token and guild id
+# try:
+#     with open("config.json") as config:
+#         config = json.load(config)
+#     # Use argument on launch to determine test bot or live bot
+#     if sys.argv[1] == "test":
+#         TOKEN = config["test"]["TOKEN"]
+#         GUILD = config["test"]["GUILD"]
+#     elif sys.argv[1] == "live":
+#         TOKEN = config["live"]["TOKEN"]
+#         GUILD = config["live"]["GUILD"]
+#     else:
+#         print("Invalid launch argument. \"test\" or \"test\"")
+#
+# except IndexError:  # If no argument is provided
+#     print("No launch argument provided.\n"
+#           "Canceling launch.")
+#     sys.exit(0)
+#
+# except FileNotFoundError:  # If the config could not be loaded
+#     print("Could not find \"config.json\"\n"
+#           "Canceling launch.")
+#     sys.exit(0)
+TOKEN = TOKEN.token()
 
 bot = commands.Bot(command_prefix=['bb:', 'BB:', 'Bb:', 'Bb:'],
                    description="Your very good friend, the Billager.",
@@ -20,6 +44,9 @@ bot = commands.Bot(command_prefix=['bb:', 'BB:', 'Bb:', 'Bb:'],
 @bot.event
 async def on_ready():
     print('Billager has logged in as {0}.'.format(bot.user.name))
+
+    # Load the command cogs
+    await cog_loader("load")
 
     # Initialize BBux bank and user prize collections
     bbux_bank = shelve.open("bbux_bank")
@@ -84,8 +111,6 @@ async def cog_loader(load_style):
 
 async def main():
     async with bot:
-        # Load the command cogs
-        await cog_loader("load")
 
         # Start up the bot
         await bot.start(TOKEN)

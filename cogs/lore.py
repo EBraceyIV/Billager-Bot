@@ -157,4 +157,4 @@ class Lore(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Lore(bot), guild=discord.Object(id=627279552481067030))
+    await bot.add_cog(Lore(bot), guild=discord.Object(id=bot.guilds[0].id))

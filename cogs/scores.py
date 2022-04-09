@@ -102,4 +102,4 @@ class Scores(commands.Cog, name="Scores"):
 
 
 async def setup(bot):
-    await bot.add_cog(Scores(bot), guild=discord.Object(id=627279552481067030))
+    await bot.add_cog(Scores(bot), guild=discord.Object(id=bot.guilds[0].id))
