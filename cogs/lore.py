@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord import app_commands
 import shelve
 import typing
+import asyncio
 
 # lore_keeper stores all of the discord.Embed objects for read/write
 lore_list = shelve.open("loreKeeper")
@@ -94,7 +95,11 @@ class Lore(commands.Cog):
 
     @app_commands.command(name="edit_lore",
                           description="Edit a piece of lore on the records.")
-    async def edit_lore(self, interaction: discord.Interaction, lore_title: str, edit_field: str, edit_content: str):
+    async def edit_lore(self,
+                        interaction: discord.Interaction,
+                        lore_title: str,
+                        edit_field: typing.Literal["title", "content", "number"],
+                        edit_content: str):
         if lore_title not in all_lore:
             await interaction.response.send_message("Can't find that lore!")
             return
@@ -136,24 +141,46 @@ class Lore(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
-    # AUTOCOM LIST ONLY SUPPORTS UP TO 25 ENTRIES
-    # SO THIS MAY NEED TO BE REMOVED OR FIXED WITH A WEIRD WORKAROUND
-    @lore.autocomplete("lore_title")
-    @edit_lore.autocomplete("lore_title")
-    async def lore_title_autocomplete(self,
-                                      interaction: discord.Interaction,
-                                      current: str) -> list[app_commands.Choice[str]]:
-        lore_titles = all_lore
-        return [app_commands.Choice(name=lore_title, value=lore_title)
-                for lore_title in lore_titles if current.lower() in lore_title.lower()]
+    # # Remove a piece of lore from the records
+    # @app_commands.command(name="kill_lore", description="Remove a piece of lore from the records.")
+    # async def kill_lore(self, interaction: discord.Interaction, lore_title: str):
+    #     # Check to see if the lore exists
+    #     if lore_title not in all_lore:
+    #         await interaction.response.send_message("Can't find that lore!")
+    #         return
+    #
+    #     # Ask for confirmation to delete the lore, confirmation conveyed by clicking on the trash can reaction
+    #     await interaction.response.send_message("Are you sure you want to destroy the " + lore_title +
+    #                                             " lore? Click 🗑 to confirm.",
+    #                                             components=[discord.Button(label="WOW", custom_id="butt")])
+    #
+    #     # The check to see if another trash can reaction is added and if it was added by the user that made the request
+    #     def check(reaction, user):
+    #         # Upon passing True, the try block below runs the else statement
+    #         return user == interaction.message.author and str(reaction.emoji) == "🗑"
+    #
+    #     # Process the confirmation message
+    #     try:
+    #         # Give the user 10 seconds to confirm according to the check function
+    #         await self.bot.wait_for('reaction_add', timeout=10.0, check=check)
+    #     except asyncio.TimeoutError:
+    #         # Inform user they ran out of time to confirm
+    #         await interaction.response.send_message("This is taking too long. Next time, be ready to pull the trigger.")
+    #     else:
+    #         # Delete the lore if confirmation check is passed
+    #         lore_access("remove", lore_title, None)
+    #         await interaction.response.send_message("The deed is done.")
 
-    @edit_lore.autocomplete("edit_field")
-    async def edit_field_autocomplete(self,
-                                      interaction: discord.Interaction,
-                                      current: str) -> list[app_commands.Choice[str]]:
-        edit_fields = ["title", "content", "number"]
-        return [app_commands.Choice(name=edit_field, value=edit_field)
-                for edit_field in edit_fields if current.lower() in edit_field.lower()]
+    # # AUTOCOM LIST ONLY SUPPORTS UP TO 25 ENTRIES
+    # # SO THIS MAY NEED TO BE REMOVED OR FIXED WITH A WEIRD WORKAROUND
+    # @lore.autocomplete("lore_title")
+    # @edit_lore.autocomplete("lore_title")
+    # async def lore_title_autocomplete(self,
+    #                                   interaction: discord.Interaction,
+    #                                   current: str) -> list[app_commands.Choice[str]]:
+    #     lore_titles = all_lore
+    #     return [app_commands.Choice(name=lore_title, value=lore_title)
+    #             for lore_title in lore_titles if current.lower() in lore_title.lower()]
 
 
 async def setup(bot):
