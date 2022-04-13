@@ -36,7 +36,7 @@ def lore_access(action, lore_title_, embed_):
 
 # Embed constructor to clear up code
 #   lore_title: The name of the lore entry
-#   lore_desc: The description / content of the lore entry
+#   lore_content: The description / content of the lore entry
 def embed_init(lore_title, lore_desc):
     # embed is the object that contains all the lore info, can be edited easily as an object
     embed = discord.Embed(title=lore_title,
@@ -51,20 +51,22 @@ def embed_init(lore_title, lore_desc):
     return embed
 
 
+# UI View to display buttons for the kill_lore command
 class Confirm(discord.ui.View):
     def __init__(self):
         super().__init__()
         self.value = None
+        self.timeout = 10  # View times out after 10 seconds
 
+    # Button to delete the lore from the record
     @discord.ui.button(style=discord.ButtonStyle.red, emoji="🗑")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("The deed is done.")
+    async def confirm(self):
         self.value = True
         self.stop()
 
-    @discord.ui.button(label='Cancel', style=discord.ButtonStyle.grey)
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message('Cancelled')
+    # Button to cancel the lore delete request
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.grey)
+    async def cancel(self):
         self.value = False
         self.stop()
 
@@ -113,8 +115,7 @@ class Lore(commands.Cog):
 
     @app_commands.command(name="edit_lore",
                           description="Edit a piece of lore on the records.")
-    async def edit_lore(self,
-                        interaction: discord.Interaction,
+    async def edit_lore(self, interaction: discord.Interaction,
                         lore_title: str,
                         edit_field: typing.Literal["title", "content", "number"],
                         edit_content: str):
@@ -168,34 +169,22 @@ class Lore(commands.Cog):
             await interaction.response.send_message("Can't find that lore!")
             return
 
-        # Ask for confirmation to delete the lore, confirmation conveyed by clicking on the trash can reaction
+        # Ask for confirmation to delete the lore, confirmation/cancel buttons used to decide
         await interaction.response.send_message("Are you sure you want to destroy the \"" + lore_title +
                                                 "\" lore? Click 🗑 to confirm.", view=view)
+
+        # Wait for a response from the UI view, button click or timeout
         await view.wait()
+
+        # Replace original response to command with the relevant result
         if view.value is None:
-            print("Timed out...")
+            await interaction.edit_original_message(content="Too late! Next time, be ready to pull the trigger.",
+                                                    view=None)
         elif view.value:
-            print("Killed")
+            lore_access("remove", lore_title, None)
+            await interaction.edit_original_message(content="The deed is done.", view=None)
         else:
-            print("Cancelled")
-
-
-        # # The check to see if another trash can reaction is added and if it was added by the user that made the request
-        # def check(reaction, user):
-        #     # Upon passing True, the try block below runs the else statement
-        #     return user == interaction.message.author and str(reaction.emoji) == "🗑"
-        #
-        # # Process the confirmation message
-        # try:
-        #     # Give the user 10 seconds to confirm according to the check function
-        #     await self.bot.wait_for('reaction_add', timeout=10.0, check=check)
-        # except asyncio.TimeoutError:
-        #     # Inform user they ran out of time to confirm
-        #     await interaction.response.send_message("This is taking too long. Next time, be ready to pull the trigger.")
-        # else:
-        #     # Delete the lore if confirmation check is passed
-        #     lore_access("remove", lore_title, None)
-        #     await interaction.response.send_message("The deed is done.")
+            await interaction.edit_original_message(content="LAME", view=None)
 
     # # AUTOCOM LIST ONLY SUPPORTS UP TO 25 ENTRIES
     # # SO THIS MAY NEED TO BE REMOVED OR FIXED WITH A WEIRD WORKAROUND
