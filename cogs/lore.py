@@ -51,6 +51,24 @@ def embed_init(lore_title, lore_desc):
     return embed
 
 
+class Confirm(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.value = None
+
+    @discord.ui.button(style=discord.ButtonStyle.red, emoji="🗑")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("The deed is done.")
+        self.value = True
+        self.stop()
+
+    @discord.ui.button(label='Cancel', style=discord.ButtonStyle.grey)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message('Cancelled')
+        self.value = False
+        self.stop()
+
+
 class Lore(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -141,35 +159,43 @@ class Lore(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
-    # # Remove a piece of lore from the records
-    # @app_commands.command(name="kill_lore", description="Remove a piece of lore from the records.")
-    # async def kill_lore(self, interaction: discord.Interaction, lore_title: str):
-    #     # Check to see if the lore exists
-    #     if lore_title not in all_lore:
-    #         await interaction.response.send_message("Can't find that lore!")
-    #         return
-    #
-    #     # Ask for confirmation to delete the lore, confirmation conveyed by clicking on the trash can reaction
-    #     await interaction.response.send_message("Are you sure you want to destroy the " + lore_title +
-    #                                             " lore? Click 🗑 to confirm.",
-    #                                             components=[discord.Button(label="WOW", custom_id="butt")])
-    #
-    #     # The check to see if another trash can reaction is added and if it was added by the user that made the request
-    #     def check(reaction, user):
-    #         # Upon passing True, the try block below runs the else statement
-    #         return user == interaction.message.author and str(reaction.emoji) == "🗑"
-    #
-    #     # Process the confirmation message
-    #     try:
-    #         # Give the user 10 seconds to confirm according to the check function
-    #         await self.bot.wait_for('reaction_add', timeout=10.0, check=check)
-    #     except asyncio.TimeoutError:
-    #         # Inform user they ran out of time to confirm
-    #         await interaction.response.send_message("This is taking too long. Next time, be ready to pull the trigger.")
-    #     else:
-    #         # Delete the lore if confirmation check is passed
-    #         lore_access("remove", lore_title, None)
-    #         await interaction.response.send_message("The deed is done.")
+    # Remove a piece of lore from the records
+    @app_commands.command(name="kill_lore", description="Remove a piece of lore from the records.")
+    async def kill_lore(self, interaction: discord.Interaction, lore_title: str):
+        view = Confirm()
+        # Check to see if the lore exists
+        if lore_title not in all_lore:
+            await interaction.response.send_message("Can't find that lore!")
+            return
+
+        # Ask for confirmation to delete the lore, confirmation conveyed by clicking on the trash can reaction
+        await interaction.response.send_message("Are you sure you want to destroy the \"" + lore_title +
+                                                "\" lore? Click 🗑 to confirm.", view=view)
+        await view.wait()
+        if view.value is None:
+            print("Timed out...")
+        elif view.value:
+            print("Killed")
+        else:
+            print("Cancelled")
+
+
+        # # The check to see if another trash can reaction is added and if it was added by the user that made the request
+        # def check(reaction, user):
+        #     # Upon passing True, the try block below runs the else statement
+        #     return user == interaction.message.author and str(reaction.emoji) == "🗑"
+        #
+        # # Process the confirmation message
+        # try:
+        #     # Give the user 10 seconds to confirm according to the check function
+        #     await self.bot.wait_for('reaction_add', timeout=10.0, check=check)
+        # except asyncio.TimeoutError:
+        #     # Inform user they ran out of time to confirm
+        #     await interaction.response.send_message("This is taking too long. Next time, be ready to pull the trigger.")
+        # else:
+        #     # Delete the lore if confirmation check is passed
+        #     lore_access("remove", lore_title, None)
+        #     await interaction.response.send_message("The deed is done.")
 
     # # AUTOCOM LIST ONLY SUPPORTS UP TO 25 ENTRIES
     # # SO THIS MAY NEED TO BE REMOVED OR FIXED WITH A WEIRD WORKAROUND
