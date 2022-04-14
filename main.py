@@ -2,12 +2,9 @@
 import os
 import discord
 from discord.ext import commands
-from discord import app_commands
 import TOKEN
 import shelve
 import asyncio
-import json
-import sys
 
 # # Load config to get token and guild id
 # try:
@@ -37,6 +34,7 @@ TOKEN = TOKEN.token()
 bot = commands.Bot(command_prefix=['bb:', 'BB:', 'Bb:', 'Bb:'],
                    description="Your very good friend, the Billager.",
                    case_insensitive=True,
+                   activity=discord.Activity(type=discord.ActivityType.playing, name="with his axe."),
                    intents=discord.Intents.all())
 
 
@@ -59,9 +57,6 @@ async def on_ready():
                 member_collections[member.mention] = {}
     bbux_bank.close()
     member_collections.close()
-
-    # Breathe a bit of life into our creation with some fun activity
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="with his axe."))
 
 
 # Print list of synced slash commands
