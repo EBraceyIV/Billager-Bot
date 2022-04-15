@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord import app_commands
 import shelve
 import typing
-import asyncio
+# TODO: Fix lore_title references to be case insensitive
 
 # lore_keeper stores all of the discord.Embed objects for read/write
 lore_list = shelve.open("loreKeeper")
