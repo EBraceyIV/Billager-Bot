@@ -60,13 +60,15 @@ class Confirm(discord.ui.View):
 
     # Button to delete the lore from the record
     @discord.ui.button(style=discord.ButtonStyle.red, emoji="🗑")
-    async def confirm(self):
+    # All three arguments are required, function must pass self.view, interaction, self.item
+    async def kill(self, interaction: discord.Interaction, button: discord.Button):
         self.value = True
         self.stop()
 
     # Button to cancel the lore delete request
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.grey)
-    async def cancel(self):
+    # All three arguments are required, function must pass self.view, interaction, self.item
+    async def cancel(self, interaction: discord.Interaction, button: discord.Button):
         self.value = False
         self.stop()
 
