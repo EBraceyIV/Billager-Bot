@@ -1,10 +1,11 @@
-import datetime
-import random
 import discord
+import datetime
 from discord.ext import commands
-from discord import app_commands
-import shelve
-import typing
+import json
+
+with open("config.json") as config_json:
+    config = json.load(config_json)
+star_channel = config["star_channel"]
 
 
 class Star(commands.Cog):
@@ -13,11 +14,17 @@ class Star(commands.Cog):
 
     @commands.Cog.listener("on_reaction_add")
     async def star(self, reaction, user):
-        print(reaction.message.reactions)
         for react in reaction.message.reactions:
             if react.emoji == "⭐":
-                print("CHECK " + str(react.count))
+                embed = discord.Embed(title=reaction.message.author.display_name,
+                                      description=reaction.message.content)
+                embed.add_field(name="**Original**",
+                                value="[Jump!](" + reaction.message.jump_url + ")")
+                # embed.timestamp = datetime.datetime.day
+
+                # print("CHECK " + str(react.count))
                 # await discord.Message.pin(reaction.message)
+                await reaction.message.channel.send(embed=embed)
 
 
 async def setup(bot):
