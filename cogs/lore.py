@@ -5,11 +5,11 @@ from discord.ext import commands
 from discord import app_commands
 import shelve
 import typing
-# TODO: Fix lore_title references to be case insensitive
 
 # lore_keeper stores all of the discord.Embed objects for read/write
 lore_list = shelve.open("loreKeeper")
 all_lore = list(lore_list.keys())
+all_lore = list((map(lambda lore_title: lore_title.lower(), all_lore)))  # map each key to lowercase
 lore_list.close()
 
 
@@ -80,7 +80,7 @@ class Lore(commands.Cog):
     # Display the requested piece of lore, or a random piece if none is specified
     @app_commands.command(name='lore', description="View some enjoyable server lore.")
     async def lore(self, interaction: discord.Interaction, *, lore_title: typing.Optional[str]):
-        lore_title = random.choice(all_lore) if lore_title is None else lore_title
+        lore_title = random.choice(all_lore) if lore_title is None else lore_title.lower()
         if lore_title not in all_lore:
             await interaction.response.send_message(
                 "You must be from a different timeline (or really bad at spelling) because we don't have "
@@ -101,7 +101,7 @@ class Lore(commands.Cog):
                       "------------------------------\n\n"
         # Then add each lore by title to the description
         for lore_title in all_lore:
-            description = description + "> " + lore_title + "\n"
+            description = description + "> " + lore_access("retrieve", lore_title, None).title + "\n"
         embed.description = description
         await interaction.response.send_message(embed=embed)
 
@@ -112,7 +112,7 @@ class Lore(commands.Cog):
         # Pass the relevant info to the embed builder
         embed = embed_init(lore_title, lore_description)
         # The lore is stored as the type embed in the shelf file
-        lore_access("add", lore_title, embed)
+        lore_access("add", lore_title.lower(), embed)
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="edit_lore",
@@ -121,22 +121,22 @@ class Lore(commands.Cog):
                         lore_title: str,
                         edit_field: typing.Literal["title", "content", "number"],
                         edit_content: str):
-        if lore_title not in all_lore:
+        if lore_title.lower() not in all_lore:
             await interaction.response.send_message("Can't find that lore!")
             return
         # Load the embed object once we know it exists so it can be edited
-        embed = lore_access("retrieve", lore_title, None)
+        embed = lore_access("retrieve", lore_title.lower(), None)
 
         if edit_field.lower() == "title":
             # Assign the edited embed to a new entry in lore_list and remove the old one
             # Easiest way I could conjure of replacing the key of a shelve entry
             embed.title = edit_content
-            lore_access("remove", lore_title, None)
-            lore_access("add", edit_content, embed)
+            lore_access("remove", lore_title.lower(), None)
+            lore_access("add", edit_content.lower(), embed)
         elif edit_field.lower() == "content":
             # Reassign the content and reassign the value to the key
             embed.description = edit_content
-            lore_access("edit", lore_title, embed)
+            lore_access("edit", lore_title.lower(), embed)
         elif edit_field.lower() == "number":
             # Validate that users have entered a valid number (int or float)
             try:
@@ -151,11 +151,11 @@ class Lore(commands.Cog):
                 else:
                     # Assign the manual ID number to the lore
                     embed.set_author(name="Lore Nugget #" + str(edit_content))
-                    lore_access("edit", lore_title, embed)
+                    lore_access("edit", lore_title.lower(), embed)
             else:
                 # Assign the manual ID number to the lore
                 embed.set_author(name="Lore Nugget #" + str(edit_content))
-                lore_access("edit", lore_title, embed)
+                lore_access("edit", lore_title.lower(), embed)
         else:
             await interaction.response.send_message("That's not an editable field for the lore.")
             return
@@ -167,7 +167,7 @@ class Lore(commands.Cog):
     async def kill_lore(self, interaction: discord.Interaction, lore_title: str):
         view = Confirm()
         # Check to see if the lore exists
-        if lore_title not in all_lore:
+        if lore_title.lower() not in all_lore:
             await interaction.response.send_message("Can't find that lore!")
             return
 
@@ -183,13 +183,14 @@ class Lore(commands.Cog):
             await interaction.edit_original_message(content="Too late! Next time, be ready to pull the trigger.",
                                                     view=None)
         elif view.value:
-            lore_access("remove", lore_title, None)
+            lore_access("remove", lore_title.lower(), None)
             await interaction.edit_original_message(content="The deed is done.", view=None)
         else:
             await interaction.edit_original_message(content="LAME", view=None)
 
     # # AUTOCOM LIST ONLY SUPPORTS UP TO 25 ENTRIES
     # # SO THIS MAY NEED TO BE REMOVED OR FIXED WITH A WEIRD WORKAROUND
+    # # Consider breaking total number into sets of 25 and navigate "pages" using UI kit buttons
     # @lore.autocomplete("lore_title")
     # @edit_lore.autocomplete("lore_title")
     # async def lore_title_autocomplete(self,
