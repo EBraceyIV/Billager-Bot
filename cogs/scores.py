@@ -82,7 +82,7 @@ class Scores(commands.Cog, name="Scores"):
         score_list.close()
         # Add some flavor text and send the message
         embed.description = "Here's the current scoreboard. Honestly can't believe these numbers: \n\n" + desc
-        embed.set_footer(text="Be sure to use bb:+ and bb:- to keep our scoreboard up to date.")
+        embed.set_footer(text="Be sure to use /plus and /minus to keep our scoreboard up to date.")
         await interaction.response.send_message(embed=embed)
 
     # Some general error processing for some of the score commands
