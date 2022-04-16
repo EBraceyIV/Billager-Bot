@@ -1,5 +1,4 @@
 import discord
-import datetime
 from discord.ext import commands
 import json
 
@@ -17,10 +16,11 @@ class Star(commands.Cog):
         for react in reaction.message.reactions:
             if react.emoji == "⭐":
                 embed = discord.Embed(title=reaction.message.author.display_name,
-                                      description=reaction.message.content)
+                                      description=reaction.message.content,
+                                      color=0xffd926)
                 embed.add_field(name="**Original**",
                                 value="[Jump!](" + reaction.message.jump_url + ")")
-                # embed.timestamp = datetime.datetime.day
+                embed.timestamp = reaction.message.created_at
 
                 # print("CHECK " + str(react.count))
                 # await discord.Message.pin(reaction.message)
