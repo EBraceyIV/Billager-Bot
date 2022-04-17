@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import random
 import datetime
 import asyncio
@@ -13,6 +13,7 @@ called_out = False
 class Auto(commands.Cog, name="Auto"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.test.start()
 
     # Check every message that comes through and perform a hog-check
     @commands.Cog.listener("on_message")
@@ -24,6 +25,12 @@ class Auto(commands.Cog, name="Auto"):
         # Reply to the secret word with 1/10 chance
         if 'hog' in message.clean_content.lower() and 1 == random.randint(1, 10):
             await message.channel.send('HYPEROMEGAHOGGERS')
+
+    @tasks.loop(time=datetime.time(17, 22, 0))
+    async def test(self):
+        callout_channel = 720833461329461347 if self.bot.user.name == "BotTest" else 743616007435976754
+        await self.bot.get_channel(callout_channel).send("TEST")
+
 
     # Every Friday night, make a call out post about whoever got the lowest score that week
     @commands.Cog.listener("on_message")
