@@ -85,20 +85,26 @@ class Scores(commands.Cog, name="Scores"):
         embed.set_footer(text="Be sure to use /plus and /minus to keep our scoreboard up to date.")
         await interaction.response.send_message(embed=embed)
 
-    # Some general error processing for some of the score commands
-
-    # @plus.error
-    # @minus.error
-    # async def plus_error(self, ctx, error):
-    #     if isinstance(error, commands.BadArgument):
-    #         await ctx.send("You can't do that " + beefBrain)
-    #     if isinstance(error, commands.MissingRequiredArgument):
-    #         await ctx.send('You forgot to give me a name ' + beefBrain)
-    #
-    # @score.error
-    # async def score_error(self, ctx, error):
-    #     if isinstance(error, commands.MissingRequiredArgument):
-    #         await ctx.send('You forgot to give me a name ' + beefBrain)
+    # Users can be +/- 1'd with a corresponding thumb reaction
+    @commands.Cog.listener("on_reaction_add")
+    async def thumbs(self, reaction, user):
+        # Thumbs down is a -1
+        if reaction.emoji == "👎":
+            if reaction.message.author.mention not in scored_members:
+                score_func("init", reaction.message.author.mention, -1)
+            else:
+                score_func("subtract", reaction.message.author.mention, 1)
+        # Thumbs up is a +1
+        elif reaction.emoji == "👍":
+            if user == reaction.message.author:  # Can't +1 yourself here either
+                pass
+            else:
+                if reaction.message.author.mention not in scored_members:
+                    score_func("init", reaction.message.author.mention, 1)
+                else:
+                    score_func("add", reaction.message.author.mention, 1)
+        else:
+            return
 
 
 async def setup(bot):
