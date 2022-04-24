@@ -90,8 +90,8 @@ class Lore(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     # Display a list of all lore currently stored
-    @app_commands.command(name="lore_list", description="See a list of all available lore.")
-    async def lore_list(self, interaction: discord.Interaction):
+    @app_commands.command(name="lore_board", description="See a list of all available lore.")
+    async def lore_board(self, interaction: discord.Interaction):
         # Initialize the embed
         embed = discord.Embed(title="Billager's Lore Compository", color=0x7289da)
         embed.set_footer(text="More Lore? Tell BBot what needs to be remembered.")
