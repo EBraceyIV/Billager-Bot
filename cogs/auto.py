@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 import discord
 from discord.ext import commands, tasks
 import random
@@ -9,6 +11,7 @@ class Auto(commands.Cog, name="Auto"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.callout.start()
+        self.score_reset.start()
 
     # Check every message that comes through and perform a hog-check
     @commands.Cog.listener("on_message")
@@ -21,9 +24,9 @@ class Auto(commands.Cog, name="Auto"):
         if 'hog' in message.clean_content.lower() and 1 == random.randint(1, 10):
             await message.channel.send('HYPEROMEGAHOGGERS')
 
-    # The task runs at the specified hour, minute, second
-    # This represents 7:00 P.M. EST (11:00 P.M. UTC)
-    @tasks.loop(time=datetime.time(11, 0, 0))
+    # Weekly Bad Score Callout Post
+    # Publicly humiliate whoever has the lowest score with an automated post each Friday
+    @tasks.loop(time=datetime.time(11, 0, 0))  # This represents 7:00 P.M. EST (11:00 P.M. UTC)
     async def callout(self):
         # If today is Friday (noted as 5 by isoweekday(), monday-sunday: 1-7), send the callout post
         if datetime.date.isoweekday(datetime.date.today()) == 5:
@@ -44,6 +47,16 @@ class Auto(commands.Cog, name="Auto"):
             callout_role = discord.utils.get(self.bot.get_guild(self.bot.guilds[0].id).roles, name="Called Out")
             # Apply the called out role to the user mentioned in the callout post
             await callout_post.mentions[0].add_roles(callout_role)
+        else:
+            return
+
+    # Reset the scoreboard at midnight on the first of each month
+    @tasks.loop(time=datetime.time(4, 0, 0))
+    async def score_reset(self):
+        if datetime.date.today().day == 1:
+            plus_minus = shelve.open("plusMinus")
+            plus_minus.clear()
+            plus_minus.close()
         else:
             return
 

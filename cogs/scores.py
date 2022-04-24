@@ -59,7 +59,7 @@ class Scores(commands.Cog, name="Scores"):
         else:
             score_func("subtract", member.mention, num)
         if member.mention == interaction.user.mention:
-            await interaction.response.send_message("I mean, if really want to...")
+            await interaction.response.send_message("I mean, if you really want to...")
             await asyncio.sleep(2)
             await interaction.edit_original_message(content="I mean, if you really want to...\n" +
                                                     member.display_name + " -" + str(num))
