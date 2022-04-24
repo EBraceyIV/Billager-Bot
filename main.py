@@ -81,6 +81,12 @@ async def sync(ctx):
     await ctx.send("Slashes synced.")
 
 
+@bot.command(name="remove", help="Remove command from cache", hidden=True)
+async def clear(ctx, command: str):
+    bot.tree.remove_command(command, guild=ctx.guild)
+    print("Removed the " + command + " command")
+
+
 @bot.command(name="ping", hidden=True)
 async def ping(ctx):
     await ctx.send("PONG!")
