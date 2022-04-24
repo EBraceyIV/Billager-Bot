@@ -9,7 +9,7 @@ import typing
 # lore_keeper stores all of the discord.Embed objects for read/write
 lore_list = shelve.open("loreKeeper")
 all_lore = list(lore_list.keys())
-all_lore = list((map(lambda lore_title: lore_title.lower(), all_lore)))  # map each key to lowercase
+# all_lore = list((map(lambda lore_title: lore_title.lower(), all_lore)))  # map each key to lowercase
 lore_list.close()
 
 
