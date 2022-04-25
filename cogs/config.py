@@ -24,10 +24,16 @@ class Config(commands.Cog, name="Config"):
             with open("config.json") as config_json:
                 config_json = json.load(config_json)
 
-        config_json[self.GUILD][config] = value
+        try:
+            config_json[self.GUILD][config] = value
+        except KeyError:
+            config_json[self.GUILD] = {"test": "", "star_channel": "", "callout_channel": ""}
+            config_json[self.GUILD][config] = value
 
         with open("config.json", "w") as outfile:
             json.dump(config_json, outfile)
+
+        await interaction.response.send_message("`Config for `" + config + "` set to `" + value)
 
 
 async def setup(bot):
