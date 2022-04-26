@@ -2,14 +2,15 @@ import discord
 from discord.ext import commands
 import json
 
-with open("config.json") as config_json:
-    config = json.load(config_json)
-star_channel = config["star_channel"]
-
 
 class Star(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.GUILD = str(bot.guilds[0].id)
+
+        with open("config.json") as config_json:
+            config = json.load(config_json)
+        self.star_channel = int(config[self.GUILD]["star_channel"][2:-1])
 
     @commands.Cog.listener("on_reaction_add")
     async def star(self, reaction, user):
@@ -23,7 +24,7 @@ class Star(commands.Cog):
                                 value="[Jump!](" + reaction.message.jump_url + ")")
                 embed.timestamp = reaction.message.created_at
 
-                await self.bot.get_channel(star_channel).send(embed=embed)
+                await self.bot.get_channel(self.star_channel).send(embed=embed)
 
 
 async def setup(bot):
