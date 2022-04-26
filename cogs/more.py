@@ -18,6 +18,11 @@ class More(commands.Cog):
     @commands.Cog.listener("on_reaction_add")
     async def star(self, reaction, user):
         for react in reaction.message.reactions:
+            # TODO: This makes it that every star added after 3 also sends the embed to the channel
+            #       Idea to fix is only allow starring on a post for a set window, e.g., 24 hours and then also keep a
+            #       log of what's starred in the last 24 hours (message content) and check against that to allow/deny
+            #       the embed message to be sent (purge content after the 24 hour period has ended) so maybe use some
+            #       db to store content and timestamp as some kind of dict thing?
             if react.emoji == "⭐" and react.count >= 3:  # At least three star reacts are needed to cause a post
                 embed = discord.Embed(description=reaction.message.content,
                                       color=0xffd926)
