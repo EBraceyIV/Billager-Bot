@@ -12,9 +12,12 @@ class Config(commands.Cog, name="Config"):
         self.GUILD = str(bot.guilds[0].id)
 
     @app_commands.command(name="set_config", description="Set one of BBot's configurations.")
+    @app_commands.describe(config="The bot config setting to define.")
+    @app_commands.describe(value="The channel to set the config for.")
     async def set_config(self, interaction: discord.Interaction,
                          config: typing.Literal["test", "star_channel", "callout_channel"],
                          value: str):
+
         try:
             with open("config.json") as config_json:
                 config_json = json.load(config_json)
@@ -33,7 +36,7 @@ class Config(commands.Cog, name="Config"):
         with open("config.json", "w") as outfile:
             json.dump(config_json, outfile)
 
-        await interaction.response.send_message("`Config for `" + config + "` set to `" + value)
+        await interaction.response.send_message("Config for `" + config + "` set to " + value)
 
 
 async def setup(bot):
