@@ -1,5 +1,4 @@
 import typing
-
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -11,6 +10,15 @@ class Config(commands.Cog, name="Config"):
         self.bot = bot
         self.GUILD = str(bot.guilds[0].id)
 
+        # If the config file cannot be found, generate a new blank one.
+        try:
+            with open("config.json") as config_json:
+                config_json = json.load(config_json)
+        except FileNotFoundError:
+            with open("config.json", "w") as config_json:
+                json.dump({self.GUILD: {"test": "", "star_channel": "", "callout_channel": ""}}, config_json)
+
+    # Set the config setting for various BBot actions, such as the channel certain messages are sent to.
     @app_commands.command(name="set_config", description="Set one of BBot's configurations.")
     @app_commands.describe(config="The bot config setting to define.")
     @app_commands.describe(value="The channel to set the config for.")
@@ -18,25 +26,25 @@ class Config(commands.Cog, name="Config"):
                          config: typing.Literal["test", "star_channel", "callout_channel"],
                          value: str):
 
-        try:
-            with open("config.json") as config_json:
-                config_json = json.load(config_json)
-        except FileNotFoundError:
-            with open("config.json", "w") as config_json:
-                json.dump({self.GUILD: {"test": "", "star_channel": "", "callout_channel": ""}}, config_json)
-            with open("config.json") as config_json:
-                config_json = json.load(config_json)
+        # Start by loading the config json as a dictionary
+        with open("config.json") as config_json:
+            config_json = json.load(config_json)
 
-        try:
-            config_json[self.GUILD][config] = value
-        except KeyError:
-            config_json[self.GUILD] = {"test": "", "star_channel": "", "callout_channel": ""}
-            config_json[self.GUILD][config] = value
+        # Set the chosen config value to that specified
+        config_json[self.GUILD][config] = value
 
-        with open("config.json", "w") as outfile:
-            json.dump(config_json, outfile)
+        # Write the updated dictionary to the json file
+        with open("config.json", "w") as new_config:
+            json.dump(config_json, new_config)
 
+        # Send message to confirm the config has been updated
         await interaction.response.send_message("Config for `" + config + "` set to " + value)
+
+        # Reload relevant cog for changed config to implement change immediately
+        if config == "star_channel":
+            await self.bot.load_extension("cogs.more")
+        elif config == "callout_channel":
+            await self.bot.load_extension("cogs.auto")
 
 
 async def setup(bot):
