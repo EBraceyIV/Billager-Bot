@@ -43,8 +43,10 @@ class Config(commands.Cog, name="Config"):
         # Reload relevant cog for changed config to implement change immediately
         if config == "star_channel":
             await self.bot.load_extension("cogs.more")
+            print("Reloaded cog: more.py")
         elif config == "callout_channel":
             await self.bot.load_extension("cogs.auto")
+            print("Reloaded cog: auto.py")
 
 
 async def setup(bot):
