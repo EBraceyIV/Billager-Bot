@@ -26,7 +26,7 @@ class Auto(commands.Cog, name="Auto"):
 
     # Weekly Bad Score Callout Post
     # Publicly humiliate whoever has the lowest score with an automated post each Friday
-    @tasks.loop(time=datetime.time(11, 0, 0))  # This represents 7:00 P.M. EST (11:00 P.M. UTC)
+    @tasks.loop(time=datetime.time(23, 0, 0))  # This represents 7:00 P.M. EST (11:00 P.M. UTC)
     async def callout(self):
         # If today is Friday (noted as 5 by isoweekday(), monday-sunday: 1-7), send the callout post
         if datetime.date.isoweekday(datetime.date.today()) == 5:
