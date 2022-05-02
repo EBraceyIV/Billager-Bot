@@ -106,6 +106,17 @@ class Scores(commands.Cog, name="Scores"):
         else:
             return
 
+    @commands.Cog.listener("on_reaction_remove")
+    async def unthumbs(self, reaction, user):
+        # Thumbs down is a -1
+        if reaction.emoji == "👎":
+            score_func("add", reaction.message.author.mention, 1)
+        # Thumbs up is a +1
+        elif reaction.emoji == "👍":
+            score_func("subtract", reaction.message.author.mention, 1)
+        else:
+            return
+
 
 async def setup(bot):
     await bot.add_cog(Scores(bot), guild=discord.Object(id=bot.guilds[0].id))
