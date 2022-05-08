@@ -1,7 +1,7 @@
 import datetime
 import typing
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
 import typing
 
@@ -18,8 +18,13 @@ class Poll(commands.Cog, name="Poll"):
                    duration: str, interval: typing.Literal["hours", "days"],
                    opt1: str, opt2: str, opt3: typing.Optional[str], opt4: typing.Optional[str]):
         embed = discord.Embed(title=title, description=description)
+        # self.test.start()
 
         await interaction.response.send_message(embed=embed)
+
+    # @tasks.loop()
+    # async def test(self):
+    #     print("E?")
 
 
 async def setup(bot):
