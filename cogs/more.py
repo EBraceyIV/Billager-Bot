@@ -17,6 +17,8 @@ class More(commands.Cog):
     # Listen for reactions and perform the specified post when the threshold is passed
     @commands.Cog.listener("on_reaction_add")
     async def star(self, reaction, user):
+        if reaction.message.channel == self.star_channel:
+            return
         for react in reaction.message.reactions:
             if react.emoji == "⭐" and react.count == 3:  # Three star reacts are needed to cause a post
                 embed = discord.Embed(description=reaction.message.content,
