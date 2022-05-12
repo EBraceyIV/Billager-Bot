@@ -29,9 +29,11 @@ class More(commands.Cog):
                                 value="[Jump!](" + reaction.message.jump_url + ")")
                 if reaction.message.attachments:
                     embed.set_image(url=reaction.message.attachments[0].url)
-                    if len(reaction.message.attachments) > 1:
+                    if len(reaction.message.attachments) > 2:
                         embed.set_footer(text="Plus " + str(len(reaction.message.attachments) - 1)
                                               + " other attachments.")
+                    else:
+                        embed.set_footer(text="Plus 1 other attachment.")
                 embed.timestamp = reaction.message.created_at
 
                 await self.bot.get_channel(self.star_channel).send(embed=embed)
