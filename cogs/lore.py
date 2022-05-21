@@ -73,6 +73,21 @@ class Confirm(discord.ui.View):
         self.stop()
 
 
+# Use a modal to make lore entry more user friendly than typing everything in the message line as arguments
+class LoreModal(discord.ui.Modal, title="Add Lore"):
+    # TextInputs to accept the lore title and description, both required
+    lore_title = discord.ui.TextInput(label="Lore Title:", style=discord.TextStyle.short,
+                                      placeholder="What will you call the lore?", required=True)
+    lore_desc = discord.ui.TextInput(label="Lore Description:", style=discord.TextStyle.long,
+                                     placeholder="What IS the lore?", required=True)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        embed = embed_init(lore_title=self.lore_title, lore_desc=self.lore_desc)
+        # The lore is stored as the type embed in the shelf file
+        lore_access("add", self.lore_title.value.lower(), embed)
+        await interaction.response.send_message(embed=embed)
+
+
 class Lore(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -108,12 +123,13 @@ class Lore(commands.Cog):
     # Add a new piece of lore to the records
     @app_commands.command(name="add_lore",
                           description="Add a new piece of lore to the records. Title and then description.")
-    async def add_lore(self, interaction: discord.Interaction, lore_title: str, *, lore_description: str):
-        # Pass the relevant info to the embed builder
-        embed = embed_init(lore_title, lore_description)
-        # The lore is stored as the type embed in the shelf file
-        lore_access("add", lore_title.lower(), embed)
-        await interaction.response.send_message(embed=embed)
+    async def add_lore(self, interaction: discord.Interaction):
+        # # Pass the relevant info to the embed builder
+        # embed = embed_init(lore_title, lore_description)
+        # # The lore is stored as the type embed in the shelf file
+        # lore_access("add", lore_title.lower(), embed)
+        # await interaction.response.send_message(embed=embed)
+        await interaction.response.send_modal(LoreModal())
 
     @app_commands.command(name="edit_lore",
                           description="Edit a piece of lore on the records.")
