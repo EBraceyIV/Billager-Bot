@@ -74,7 +74,7 @@ class Confirm(discord.ui.View):
 
 
 # Use a modal to make lore entry more user friendly than typing everything in the message line as arguments
-class LoreModal(discord.ui.Modal, title="Add Lore"):
+class AddLoreModal(discord.ui.Modal, title="Add Lore"):
     # TextInputs to accept the lore title and description, both required
     lore_title = discord.ui.TextInput(label="Lore Title:", style=discord.TextStyle.short,
                                       placeholder="What will you call the lore?", required=True)
@@ -122,14 +122,9 @@ class Lore(commands.Cog):
 
     # Add a new piece of lore to the records
     @app_commands.command(name="add_lore",
-                          description="Add a new piece of lore to the records. Title and then description.")
+                          description="Use a modal to add new lore to the records.")
     async def add_lore(self, interaction: discord.Interaction):
-        # # Pass the relevant info to the embed builder
-        # embed = embed_init(lore_title, lore_description)
-        # # The lore is stored as the type embed in the shelf file
-        # lore_access("add", lore_title.lower(), embed)
-        # await interaction.response.send_message(embed=embed)
-        await interaction.response.send_modal(LoreModal())
+        await interaction.response.send_modal(AddLoreModal())
 
     @app_commands.command(name="edit_lore",
                           description="Edit a piece of lore on the records.")
