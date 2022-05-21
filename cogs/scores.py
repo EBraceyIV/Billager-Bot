@@ -49,6 +49,7 @@ class Scores(commands.Cog, name="Scores"):
                 score_func("init", member.mention, num)
             else:
                 score_func("add", member.mention, num)
+            print(interaction.user.display_name + " +" + str(num) + " to " + member.display_name)
             await interaction.response.send_message(str(member.display_name) + ' +' + str(num))
 
     # Let users subtract from other user's scores
@@ -58,6 +59,7 @@ class Scores(commands.Cog, name="Scores"):
             score_func("init", member.mention, -num)
         else:
             score_func("subtract", member.mention, num)
+        print(interaction.user.display_name + " -" + str(num) + " to " + member.display_name)
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("I mean, if you really want to...")
             await asyncio.sleep(2)
@@ -90,6 +92,7 @@ class Scores(commands.Cog, name="Scores"):
     async def thumbs(self, reaction, user):
         # Thumbs down is a -1
         if reaction.emoji == "👎":
+            print(user.display_name + " -1" + " to " + reaction.message.author.display_name)
             if reaction.message.author.mention not in scored_members:
                 score_func("init", reaction.message.author.mention, -1)
             else:
@@ -99,6 +102,7 @@ class Scores(commands.Cog, name="Scores"):
             if user == reaction.message.author:  # Can't +1 yourself here either
                 pass
             else:
+                print(user.display_name + " +1" + " to " + reaction.message.author.display_name)
                 if reaction.message.author.mention not in scored_members:
                     score_func("init", reaction.message.author.mention, 1)
                 else:
@@ -110,9 +114,11 @@ class Scores(commands.Cog, name="Scores"):
     async def unthumbs(self, reaction, user):
         # Thumbs down is a -1
         if reaction.emoji == "👎":
+            print(user.display_name + " undid -1" + " to " + reaction.message.author.display_name)
             score_func("add", reaction.message.author.mention, 1)
         # Thumbs up is a +1
         elif reaction.emoji == "👍":
+            print(user.display_name + " undid +1" + " to " + reaction.message.author.display_name)
             score_func("subtract", reaction.message.author.mention, 1)
         else:
             return
