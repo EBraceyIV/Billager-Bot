@@ -42,33 +42,33 @@ class Scores(commands.Cog, name="Scores"):
     # Let users add to other user's scores
     @app_commands.command(name="plus", description="Add to a user's score")
     @app_commands.checks.cooldown(rate=1, per=60)
-    async def plus(self, interaction: discord.Interaction, member: discord.Member, num: typing.Optional[int] = 1):
+    async def plus(self, interaction: discord.Interaction, member: discord.Member):
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
         else:
             if member.mention not in scored_members:
-                score_func("init", member.mention, num)
+                score_func("init", member.mention, 1)
             else:
-                score_func("add", member.mention, num)
-            print(interaction.user.display_name + " +" + str(num) + " to " + member.display_name)
-            await interaction.response.send_message(str(member.display_name) + ' +' + str(num))
+                score_func("add", member.mention, 1)
+            print(interaction.user.display_name + " +1 to " + member.display_name)
+            await interaction.response.send_message(str(member.display_name) + " +1")
 
     # Let users subtract from other user's scores
     @app_commands.command(name="minus", description="Subtract from a user's score")
     @app_commands.checks.cooldown(rate=1, per=60)
-    async def minus(self, interaction: discord.Interaction, member: discord.Member, num: typing.Optional[int] = 1):
+    async def minus(self, interaction: discord.Interaction, member: discord.Member):
         if member.mention not in scored_members:
-            score_func("init", member.mention, -num)
+            score_func("init", member.mention, -1)
         else:
-            score_func("subtract", member.mention, num)
-        print(interaction.user.display_name + " -" + str(num) + " to " + member.display_name)
+            score_func("subtract", member.mention, 1)
+        print(interaction.user.display_name + " -1 to " + member.display_name)
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("I mean, if you really want to...")
             await asyncio.sleep(2)
             await interaction.edit_original_message(content="I mean, if you really want to...\n" +
-                                                    member.display_name + " -" + str(num))
+                                                    member.display_name + " -1")
         else:
-            await interaction.response.send_message(str(member.display_name) + ' -' + str(num))
+            await interaction.response.send_message(str(member.display_name) + " -1")
 
     # Show a scoreboard from highest to lowest for all users with a score
     @app_commands.command(name="scoreboard", description="Scoreboard of the highest and lowest scores.")
@@ -129,7 +129,7 @@ class Scores(commands.Cog, name="Scores"):
     @minus.error
     async def on_score_change_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message("Too quick, chuckle nuts!")
+            await interaction.response.send_message("Too quick, chuckle nuts!", ephemeral=True)
 
 
 async def setup(bot):
