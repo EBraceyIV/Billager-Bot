@@ -41,6 +41,7 @@ class Scores(commands.Cog, name="Scores"):
 
     # Let users add to other user's scores
     @app_commands.command(name="plus", description="Add to a user's score")
+    @app_commands.checks.cooldown(rate=1, per=60)
     async def plus(self, interaction: discord.Interaction, member: discord.Member, num: typing.Optional[int] = 1):
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
@@ -54,6 +55,7 @@ class Scores(commands.Cog, name="Scores"):
 
     # Let users subtract from other user's scores
     @app_commands.command(name="minus", description="Subtract from a user's score")
+    @app_commands.checks.cooldown(rate=1, per=60)
     async def minus(self, interaction: discord.Interaction, member: discord.Member, num: typing.Optional[int] = 1):
         if member.mention not in scored_members:
             score_func("init", member.mention, -num)
@@ -122,6 +124,12 @@ class Scores(commands.Cog, name="Scores"):
             score_func("subtract", reaction.message.author.mention, 1)
         else:
             return
+
+    @plus.error
+    @minus.error
+    async def on_score_change_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message("Too quick, chuckle nuts!")
 
 
 async def setup(bot):
