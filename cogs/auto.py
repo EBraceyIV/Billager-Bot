@@ -50,10 +50,15 @@ class Auto(commands.Cog, name="Auto"):
         else:
             return
 
-    # Reset the scoreboard at midnight on the first of each month
+    # Reset the scoreboard at midnight after the last callout post of the month
     @tasks.loop(time=datetime.time(4, 0, 0))
     async def score_reset(self):
-        if datetime.date.today().day == 1:
+        # Get the day of the month of the next friday
+        next_friday = datetime.date.today() + datetime.timedelta(days=6)
+        # If the loop runs on a Saturday (midnight following callout post on Friday evening,
+        # and the next Friday's day is a lower number than yesterday's Friday,
+        # then reset the scoreboard since that was the last friday of the month.
+        if datetime.date.isoweekday(datetime.date.today()) == 6 and datetime.date.today().day - 1 > next_friday.day:
             plus_minus = shelve.open("plusMinus")
             plus_minus.clear()
             plus_minus.close()
