@@ -122,7 +122,7 @@ class Lore(commands.Cog):
 
     # Add a new piece of lore to the records
     @app_commands.command(name="add_lore",
-                          description="Use a modal to add new lore to the records.")
+                          description="Add a new piece of lore to the records. Title and then description.")
     async def add_lore(self, interaction: discord.Interaction):
         await interaction.response.send_modal(AddLoreModal())
 
