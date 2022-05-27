@@ -5,7 +5,11 @@ from discord.ext import commands
 from discord import app_commands
 import shelve
 import datetime
+import pytz
 import typing
+
+# TODO: Add handling for on_reaction_clear and on_reaction_clear_emoji like how on_reaction_remove works
+#       so that they can't be used as a workaround to stealth manipulate the scoreboard
 
 # Initialize the scoreboard list of all currently scored members
 scores = shelve.open("plusMinus")
@@ -30,6 +34,18 @@ def score_func(action, member, amount):
         plus_minus[member] = plus_minus.get(member) - amount
     scored_members = list(plus_minus.keys())
     plus_minus.close()
+
+
+# Check performed on thumb reactions to prevent affecting scores using old posts
+def thumb_recency(reaction, react_time) -> bool:
+    message_time = reaction.message.created_at.replace(tzinfo=None)
+    react_delta = react_time - message_time
+    # The recency defines how old a message has to be to not be valid for thumb reactions
+    recency_delta = datetime.timedelta(hours=12)
+    if react_delta < recency_delta:
+        return True
+    else:
+        return False
 
 
 # This is here to use
@@ -95,6 +111,9 @@ class Scores(commands.Cog, name="Scores"):
     # Users can be +/- 1'd with a corresponding thumb reaction
     @commands.Cog.listener("on_reaction_add")
     async def thumbs(self, reaction, user):
+        # Recency check for reaction so you can't thumb down an old message
+        if not thumb_recency(reaction, datetime.datetime.utcnow()):
+            return
         # Thumbs down is a -1
         if reaction.emoji == "👎":
             print(user.display_name + " -1" + " to " + reaction.message.author.display_name +
