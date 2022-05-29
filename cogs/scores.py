@@ -111,6 +111,9 @@ class Scores(commands.Cog, name="Scores"):
     # Users can be +/- 1'd with a corresponding thumb reaction
     @commands.Cog.listener("on_reaction_add")
     async def thumbs(self, reaction, user):
+        # Initialize user's score if needed
+        if reaction.message.author.mention not in scored_members:
+            score_func("init", reaction.message.author.mention, 0)
         # Recency check for reaction so you can't thumb down an old message
         if not thumb_recency(reaction, datetime.datetime.utcnow()):
             return
@@ -138,6 +141,9 @@ class Scores(commands.Cog, name="Scores"):
 
     @commands.Cog.listener("on_reaction_remove")
     async def unthumbs(self, reaction, user):
+        # Initialize user's score if needed
+        if reaction.message.author.mention not in scored_members:
+            score_func("init", reaction.message.author.mention, 0)
         # Thumbs down is a -1
         if reaction.emoji == "👎":
             print(user.display_name + " undid -1" + " to " + reaction.message.author.display_name +
