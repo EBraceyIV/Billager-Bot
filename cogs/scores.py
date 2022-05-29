@@ -8,8 +8,6 @@ import datetime
 import pytz
 import typing
 
-# TODO: Add handling for on_reaction_clear and on_reaction_clear_emoji like how on_reaction_remove works
-#       so that they can't be used as a workaround to stealth manipulate the scoreboard
 
 # Initialize the scoreboard list of all currently scored members
 scores = shelve.open("plusMinus")
