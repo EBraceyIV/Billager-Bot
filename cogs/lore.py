@@ -104,8 +104,10 @@ class EditLoreModal(discord.ui.Modal, title="Edit Lore"):
                                         style=discord.TextStyle.long,
                                         placeholder="Type Here!", required=True)
 
+    # Update the label to include the lore title if it fits, for improved user experience
     def add_label(self):
         label = "Change above content for " + str(self.embed.title) + ":"
+        # Labels longer than 45 characters throw an error, CommandInvoke because of HTTPException or something like that
         if len(label) > 45:
             pass
         else:
