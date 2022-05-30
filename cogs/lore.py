@@ -100,12 +100,16 @@ class EditLoreModal(discord.ui.Modal, title="Edit Lore"):
                                    min_values=1, max_values=1,
                                    placeholder="Pick a field to edit!")
 
-    edit_content = discord.ui.TextInput(label="",
+    edit_content = discord.ui.TextInput(label="Change above content for the lore:",
                                         style=discord.TextStyle.long,
                                         placeholder="Type Here!", required=True)
 
     def add_label(self):
-        self.edit_content.label = "Change above content for " + str(self.embed.title) + ":"
+        label = "Change above content for " + str(self.embed.title) + ":"
+        if len(label) > 45:
+            pass
+        else:
+            self.edit_content.label = label
 
     async def on_submit(self, interaction: discord.Interaction):
         embed = self.embed
