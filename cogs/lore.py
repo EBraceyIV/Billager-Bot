@@ -82,9 +82,60 @@ class AddLoreModal(discord.ui.Modal, title="Add Lore"):
                                      placeholder="What IS the lore?", required=True)
 
     async def on_submit(self, interaction: discord.Interaction):
-        embed = embed_init(lore_title=self.lore_title, lore_desc=self.lore_desc)
+        # Have to add .value to get string, otherwise uses TextInput object
+        embed = embed_init(lore_title=self.lore_title.value, lore_desc=self.lore_desc.value)
         # The lore is stored as the type embed in the shelf file
         lore_access("add", self.lore_title.value.lower(), embed)
+        await interaction.response.send_message(embed=embed)
+
+
+class EditLoreModal(discord.ui.Modal, title="Edit Lore"):
+    def __init__(self):
+        super().__init__()
+        self.embed = None
+
+    edit_field = discord.ui.Select(options=[discord.SelectOption(label="Title", value="title"),
+                                            discord.SelectOption(label="Description", value="desc"),
+                                            discord.SelectOption(label="Number", value="num")],
+                                   min_values=1, max_values=1,
+                                   placeholder="Pick a field to edit!")
+
+    edit_content = discord.ui.TextInput(label="",
+                                        style=discord.TextStyle.long,
+                                        placeholder="Type Here!", required=True)
+
+    def add_label(self):
+        self.edit_content.label = "Change above content for " + str(self.embed.title) + ":"
+
+    async def on_submit(self, interaction: discord.Interaction):
+        embed = self.embed
+        lore_title = embed.title
+        if self.edit_field.values[0] == "title":
+            embed.title = self.edit_content.value.rstrip('\n')
+            lore_access("remove", lore_title.lower(), None)
+            lore_access("add", embed.title.lower(), embed)
+        elif self.edit_field.values[0] == "desc":
+            embed.description = self.edit_content.value
+            lore_access("edit", lore_title.lower(), embed)
+        elif self.edit_field.values[0] == "num":
+            # Validate that users have entered a valid number (int or float)
+            try:
+                edit_content = int(self.edit_content.value)
+            except ValueError:
+                try:
+                    edit_content = float(self.edit_content.value)
+                except ValueError:
+                    await interaction.response.send_message(
+                        "Since my brain is a computer, it'll help if you make that a number instead.")
+                    return
+                else:
+                    # Assign the manual ID number to the lore
+                    embed.set_author(name="Lore Nugget #" + str(edit_content))
+                    lore_access("edit", lore_title.lower(), embed)
+            else:
+                # Assign the manual ID number to the lore
+                embed.set_author(name="Lore Nugget #" + str(edit_content))
+                lore_access("edit", lore_title.lower(), embed)
         await interaction.response.send_message(embed=embed)
 
 
@@ -128,50 +179,18 @@ class Lore(commands.Cog):
 
     @app_commands.command(name="edit_lore",
                           description="Edit a piece of lore on the records.")
-    async def edit_lore(self, interaction: discord.Interaction,
-                        lore_title: str,
-                        edit_field: typing.Literal["title", "content", "number"],
-                        edit_content: str):
+    async def edit_lore(self, interaction: discord.Interaction, lore_title: str):
         if lore_title.lower() not in all_lore:
             await interaction.response.send_message("Can't find that lore!")
             return
         # Load the embed object once we know it exists so it can be edited
         embed = lore_access("retrieve", lore_title.lower(), None)
 
-        if edit_field.lower() == "title":
-            # Assign the edited embed to a new entry in lore_list and remove the old one
-            # Easiest way I could conjure of replacing the key of a shelve entry
-            embed.title = edit_content
-            lore_access("remove", lore_title.lower(), None)
-            lore_access("add", edit_content.lower(), embed)
-        elif edit_field.lower() == "content":
-            # Reassign the content and reassign the value to the key
-            embed.description = edit_content
-            lore_access("edit", lore_title.lower(), embed)
-        elif edit_field.lower() == "number":
-            # Validate that users have entered a valid number (int or float)
-            try:
-                edit_content = int(edit_content)
-            except ValueError:
-                try:
-                    edit_content = float(edit_content)
-                except ValueError:
-                    await interaction.response.send_message(
-                        "Since my brain is a computer, it'll help if you make that a number instead.")
-                    return
-                else:
-                    # Assign the manual ID number to the lore
-                    embed.set_author(name="Lore Nugget #" + str(edit_content))
-                    lore_access("edit", lore_title.lower(), embed)
-            else:
-                # Assign the manual ID number to the lore
-                embed.set_author(name="Lore Nugget #" + str(edit_content))
-                lore_access("edit", lore_title.lower(), embed)
-        else:
-            await interaction.response.send_message("That's not an editable field for the lore.")
-            return
-
-        await interaction.response.send_message(embed=embed)
+        # Bring up edit modal and send response
+        edit_modal = EditLoreModal()
+        edit_modal.embed = embed
+        edit_modal.add_label()
+        await interaction.response.send_modal(edit_modal)
 
     # Remove a piece of lore from the records
     @app_commands.command(name="kill_lore", description="Remove a piece of lore from the records.")
