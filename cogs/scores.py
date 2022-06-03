@@ -52,7 +52,7 @@ beefBrain = '<:BeefBrain:631694337549271050>'
 
 @app_commands.checks.cooldown(rate=1, per=60)
 async def ctx_plus_msg(interaction: discord.Interaction, message: discord.Message):
-    if message.author == interaction.user.mention:
+    if message.author.mention == interaction.user.mention:
         await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
     else:
         if message.author.mention not in scored_members:
@@ -81,6 +81,37 @@ async def ctx_minus_msg(interaction: discord.Interaction, message: discord.Messa
         await interaction.response.send_message(str(message.author.display_name) + " -1")
 
 
+@app_commands.checks.cooldown(rate=1, per=60)
+async def ctx_plus_usr(interaction: discord.Interaction, member: discord.Member):
+    if member.mention == interaction.user.mention:
+        await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
+    else:
+        if member.mention not in scored_members:
+            score_func("init", member.mention, 1)
+        else:
+            score_func("add", member.mention, 1)
+        print(interaction.user.display_name + " +1 to " + member.display_name +
+              " @ " + str(datetime.datetime.now()))
+    await interaction.response.send_message(str(member.display_name) + " +1")
+
+
+@app_commands.checks.cooldown(rate=1, per=60)
+async def ctx_minus_usr(interaction: discord.Interaction, member: discord.Member):
+    if member.mention not in scored_members:
+        score_func("init", member.mention, -1)
+    else:
+        score_func("subtract", member.mention, 1)
+    print(interaction.user.display_name + " -1 to " + member.display_name +
+          " @ " + str(datetime.datetime.now()))
+    if member.mention == interaction.user.mention:
+        await interaction.response.send_message("I mean, if you really want to...")
+        await asyncio.sleep(2)
+        await interaction.edit_original_message(content="I mean, if you really want to...\n" +
+                                                member.display_name + " -1")
+    else:
+        await interaction.response.send_message(str(member.display_name) + " -1")
+
+
 class Scores(commands.Cog, name="Scores"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -90,12 +121,22 @@ class Scores(commands.Cog, name="Scores"):
         self.ctx_menu_minus_msg = app_commands.ContextMenu(name="-1",
                                                            callback=ctx_minus_msg,
                                                            guild_ids=[self.bot.guilds[0].id])
+        self.ctx_menu_plus_usr = app_commands.ContextMenu(name="+1",
+                                                          callback=ctx_plus_usr,
+                                                          guild_ids=[self.bot.guilds[0].id])
+        self.ctx_menu_minus_usr = app_commands.ContextMenu(name="-1",
+                                                           callback=ctx_minus_usr,
+                                                           guild_ids=[self.bot.guilds[0].id])
         self.bot.tree.add_command(self.ctx_menu_plus_msg)
         self.bot.tree.add_command(self.ctx_menu_minus_msg)
+        self.bot.tree.add_command(self.ctx_menu_plus_usr)
+        self.bot.tree.add_command(self.ctx_menu_minus_usr)
 
     async def cog_unload(self) -> None:
         self.bot.tree.remove_command(self.ctx_menu_plus_msg.name, type=self.ctx_menu_plus_msg.type)
         self.bot.tree.remove_command(self.ctx_menu_minus_msg.name, type=self.ctx_menu_minus_msg.type)
+        self.bot.tree.remove_command(self.ctx_menu_plus_usr.name, type=self.ctx_menu_plus_usr.type)
+        self.bot.tree.remove_command(self.ctx_menu_minus_usr.name, type=self.ctx_menu_minus_usr.type)
 
     # Let users add to other user's scores
     @app_commands.command(name="plus", description="Add to a user's score")
