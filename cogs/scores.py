@@ -50,9 +50,52 @@ def thumb_recency(reaction, react_time) -> bool:
 beefBrain = '<:BeefBrain:631694337549271050>'
 
 
+@app_commands.checks.cooldown(rate=1, per=60)
+async def ctx_plus_one(interaction: discord.Interaction, message: discord.Message):
+    if message.author == interaction.user.mention:
+        await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
+    else:
+        if message.author.mention not in scored_members:
+            score_func("init", message.author.mention, 1)
+        else:
+            score_func("add", message.author.mention, 1)
+        print(interaction.user.display_name + " +1 to " + message.author.display_name +
+              " @ " + str(datetime.datetime.now()))
+    await interaction.response.send_message(str(message.author.display_name) + " +1")
+
+
+@app_commands.checks.cooldown(rate=1, per=60)
+async def ctx_minus_one(interaction: discord.Interaction, message: discord.Message):
+    if message.author.mention not in scored_members:
+        score_func("init", message.author.mention, -1)
+    else:
+        score_func("subtract", message.author.mention, 1)
+    print(interaction.user.display_name + " -1 to " + message.author.display_name +
+          " @ " + str(datetime.datetime.now()))
+    if message.author.mention == interaction.user.mention:
+        await interaction.response.send_message("I mean, if you really want to...")
+        await asyncio.sleep(2)
+        await interaction.edit_original_message(content="I mean, if you really want to...\n" +
+                                                message.author.display_name + " -1")
+    else:
+        await interaction.response.send_message(str(message.author.display_name) + " -1")
+
+
 class Scores(commands.Cog, name="Scores"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.ctx_menu_plus_one = app_commands.ContextMenu(name="+1",
+                                                          callback=ctx_plus_one,
+                                                          guild_ids=[self.bot.guilds[0].id])
+        self.ctx_menu_minus_one = app_commands.ContextMenu(name="-1",
+                                                           callback=ctx_minus_one,
+                                                           guild_ids=[self.bot.guilds[0].id])
+        self.bot.tree.add_command(self.ctx_menu_plus_one)
+        self.bot.tree.add_command(self.ctx_menu_minus_one)
+
+    async def cog_unload(self) -> None:
+        self.bot.tree.remove_command(self.ctx_menu_plus_one.name, type=self.ctx_menu_plus_one.type)
+        self.bot.tree.remove_command(self.ctx_menu_minus_one.name, type=self.ctx_menu_minus_one.type)
 
     # Let users add to other user's scores
     @app_commands.command(name="plus", description="Add to a user's score")
