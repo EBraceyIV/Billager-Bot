@@ -19,21 +19,9 @@ fortCry = '<:fortCry:600190388241694770>'
 server = JavaServer.lookup("51.81.206.215:25589")  # my minecraft server
 
 
-async def ctx_menu_command(interaction: discord.Interaction, message: discord.Message):
-    await interaction.response.send_message("I am a test message. Please submit suggestions for features using "
-                                            "the context menus.")
-
-
 class General(commands.Cog, name="General"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.ctx_menu = app_commands.ContextMenu(name="Test CTX Menu",
-                                                 callback=ctx_menu_command,
-                                                 guild_ids=[self.bot.guilds[0].id])
-        self.bot.tree.add_command(self.ctx_menu)
-
-    async def cog_unload(self) -> None:
-        self.bot.tree.remove_command(self.ctx_menu.name, type=self.ctx_menu.type)
 
     # # This currently serves no real purpose. Just learning the channels and utils functionality.
     # @commands.command(name='channels', help='Dev only, does nothing (that you can see).', hidden=True)
