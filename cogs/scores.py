@@ -35,15 +35,14 @@ def score_func(action, member, amount):
 
 
 # Check performed on thumb reactions to prevent affecting scores using old posts
-def thumb_recency(reaction, react_time) -> bool:
+def thumb_recency(reaction) -> bool:
+    # Get when the message being thumbed was sent
     message_time = reaction.message.created_at.replace(tzinfo=None)
-    react_delta = react_time - message_time
+    # Get the time between the message being posted and the thumb being given
+    react_delta = datetime.datetime.utcnow() - message_time
     # The recency defines how old a message has to be to not be valid for thumb reactions
-    recency_delta = datetime.timedelta(hours=12)
-    if react_delta < recency_delta:
-        return True
-    else:
-        return False
+    recency_delta = datetime.timedelta(seconds=12)
+    return react_delta < recency_delta
 
 
 # This is here to use
@@ -197,7 +196,7 @@ class Scores(commands.Cog, name="Scores"):
         if reaction.message.author.mention not in scored_members:
             score_func("init", reaction.message.author.mention, 0)
         # Recency check for reaction so you can't thumb down an old message
-        if not thumb_recency(reaction, datetime.datetime.utcnow()):
+        if not thumb_recency(reaction):
             return
         # Thumbs down is a -1
         if reaction.emoji == "👎":
