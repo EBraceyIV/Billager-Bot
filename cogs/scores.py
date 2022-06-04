@@ -41,8 +41,47 @@ def thumb_recency(reaction) -> bool:
     # Get the time between the message being posted and the thumb being given
     react_delta = datetime.datetime.utcnow() - message_time
     # The recency defines how old a message has to be to not be valid for thumb reactions
-    recency_delta = datetime.timedelta(seconds=12)
+    recency_delta = datetime.timedelta(hours=12)
     return react_delta < recency_delta
+
+
+def score_process(interaction, source: typing.Union[discord.Member, discord.Message], action):
+    if type(source) is discord.Message:
+        message = source
+        if action == "add":
+            if message.author.mention not in scored_members:
+                score_func("init", message.author.mention, 1)
+            else:
+                score_func("add", message.author.mention, 1)
+            print(interaction.user.display_name + " +1 to " + message.author.display_name +
+                  " @ " + str(datetime.datetime.now()))
+        else:
+            if message.author.mention not in scored_members:
+                score_func("init", message.author.mention, -1)
+            else:
+                score_func("subtract", message.author.mention, 1)
+            print(interaction.user.display_name + " -1 to " + message.author.display_name +
+                  " @ " + str(datetime.datetime.now()))
+
+    elif type(source) is discord.Member:
+        member = source
+        if action == "add":
+            if member.mention not in scored_members:
+                score_func("init", member.mention, 1)
+            else:
+                score_func("add", member.mention, 1)
+            print(interaction.user.display_name + " +1 to " + member.display_name +
+                  " @ " + str(datetime.datetime.now()))
+        else:
+            if member.mention not in scored_members:
+                score_func("init", member.mention, -1)
+            else:
+                score_func("subtract", member.mention, 1)
+            print(interaction.user.display_name + " -1 to " + member.display_name +
+                  " @ " + str(datetime.datetime.now()))
+
+    else:
+        print("Something is wrong with the scoring system!")
 
 
 # This is here to use
@@ -54,23 +93,25 @@ async def ctx_plus_msg(interaction: discord.Interaction, message: discord.Messag
     if message.author.mention == interaction.user.mention:
         await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
     else:
-        if message.author.mention not in scored_members:
-            score_func("init", message.author.mention, 1)
-        else:
-            score_func("add", message.author.mention, 1)
-        print(interaction.user.display_name + " +1 to " + message.author.display_name +
-              " @ " + str(datetime.datetime.now()))
+        score_process(interaction, message, "add")
+        # if message.author.mention not in scored_members:
+        #     score_func("init", message.author.mention, 1)
+        # else:
+        #     score_func("add", message.author.mention, 1)
+        # print(interaction.user.display_name + " +1 to " + message.author.display_name +
+        #       " @ " + str(datetime.datetime.now()))
     await interaction.response.send_message(str(message.author.display_name) + " +1")
 
 
 @app_commands.checks.cooldown(rate=1, per=60)
 async def ctx_minus_msg(interaction: discord.Interaction, message: discord.Message):
-    if message.author.mention not in scored_members:
-        score_func("init", message.author.mention, -1)
-    else:
-        score_func("subtract", message.author.mention, 1)
-    print(interaction.user.display_name + " -1 to " + message.author.display_name +
-          " @ " + str(datetime.datetime.now()))
+    score_process(interaction, message, "subtract")
+    # if message.author.mention not in scored_members:
+    #     score_func("init", message.author.mention, -1)
+    # else:
+    #     score_func("subtract", message.author.mention, 1)
+    # print(interaction.user.display_name + " -1 to " + message.author.display_name +
+    #       " @ " + str(datetime.datetime.now()))
     if message.author.mention == interaction.user.mention:
         await interaction.response.send_message("I mean, if you really want to...")
         await asyncio.sleep(2)
@@ -85,23 +126,25 @@ async def ctx_plus_usr(interaction: discord.Interaction, member: discord.Member)
     if member.mention == interaction.user.mention:
         await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
     else:
-        if member.mention not in scored_members:
-            score_func("init", member.mention, 1)
-        else:
-            score_func("add", member.mention, 1)
-        print(interaction.user.display_name + " +1 to " + member.display_name +
-              " @ " + str(datetime.datetime.now()))
+        score_process(interaction, member, "add")
+        # if member.mention not in scored_members:
+        #     score_func("init", member.mention, 1)
+        # else:
+        #     score_func("add", member.mention, 1)
+        # print(interaction.user.display_name + " +1 to " + member.display_name +
+        #       " @ " + str(datetime.datetime.now()))
     await interaction.response.send_message(str(member.display_name) + " +1")
 
 
 @app_commands.checks.cooldown(rate=1, per=60)
 async def ctx_minus_usr(interaction: discord.Interaction, member: discord.Member):
-    if member.mention not in scored_members:
-        score_func("init", member.mention, -1)
-    else:
-        score_func("subtract", member.mention, 1)
-    print(interaction.user.display_name + " -1 to " + member.display_name +
-          " @ " + str(datetime.datetime.now()))
+    score_process(interaction, member, "subtract")
+    # if member.mention not in scored_members:
+    #     score_func("init", member.mention, -1)
+    # else:
+    #     score_func("subtract", member.mention, 1)
+    # print(interaction.user.display_name + " -1 to " + member.display_name +
+    #       " @ " + str(datetime.datetime.now()))
     if member.mention == interaction.user.mention:
         await interaction.response.send_message("I mean, if you really want to...")
         await asyncio.sleep(2)
