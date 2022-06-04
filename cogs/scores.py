@@ -187,24 +187,26 @@ class Scores(commands.Cog, name="Scores"):
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
         else:
-            if member.mention not in scored_members:
-                score_func("init", member.mention, 1)
-            else:
-                score_func("add", member.mention, 1)
-            print(interaction.user.display_name + " +1 to " + member.display_name +
-                  " @ " + str(datetime.datetime.now()))
+            score_process(interaction, member, "add")
+            # if member.mention not in scored_members:
+            #     score_func("init", member.mention, 1)
+            # else:
+            #     score_func("add", member.mention, 1)
+            # print(interaction.user.display_name + " +1 to " + member.display_name +
+            #       " @ " + str(datetime.datetime.now()))
             await interaction.response.send_message(str(member.display_name) + " +1")
 
     # Let users subtract from other user's scores
     @app_commands.command(name="minus", description="Subtract from a user's score")
     @app_commands.checks.cooldown(rate=1, per=60)
     async def minus(self, interaction: discord.Interaction, member: discord.Member):
-        if member.mention not in scored_members:
-            score_func("init", member.mention, -1)
-        else:
-            score_func("subtract", member.mention, 1)
-        print(interaction.user.display_name + " -1 to " + member.display_name +
-              " @ " + str(datetime.datetime.now()))
+        score_process(interaction, member, "subtract")
+        # if member.mention not in scored_members:
+        #     score_func("init", member.mention, -1)
+        # else:
+        #     score_func("subtract", member.mention, 1)
+        # print(interaction.user.display_name + " -1 to " + member.display_name +
+        #       " @ " + str(datetime.datetime.now()))
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("I mean, if you really want to...")
             await asyncio.sleep(2)
