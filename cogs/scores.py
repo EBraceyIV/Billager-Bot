@@ -45,7 +45,10 @@ def thumb_recency(reaction) -> bool:
     return react_delta < recency_delta
 
 
+# This function cleans up the rest of the cog by condensing repeat code that would appear
+# The source variable can accept multiple types to support commands, context menu (user/message), etc
 def score_process(interaction, source: typing.Union[discord.Member, discord.Message], action):
+    # The discord.Message type supports score changes that come from context menus on messages
     if type(source) is discord.Message:
         message = source
         if action == "add":
@@ -62,7 +65,7 @@ def score_process(interaction, source: typing.Union[discord.Member, discord.Mess
                 score_func("subtract", message.author.mention, 1)
             print(interaction.user.display_name + " -1 to " + message.author.display_name +
                   " @ " + str(datetime.datetime.now()))
-
+    # The discord.Member type supports the app commands and context menus on users
     elif type(source) is discord.Member:
         member = source
         if action == "add":
@@ -79,7 +82,6 @@ def score_process(interaction, source: typing.Union[discord.Member, discord.Mess
                 score_func("subtract", member.mention, 1)
             print(interaction.user.display_name + " -1 to " + member.display_name +
                   " @ " + str(datetime.datetime.now()))
-
     else:
         print("Something is wrong with the scoring system!")
 
@@ -94,24 +96,12 @@ async def ctx_plus_msg(interaction: discord.Interaction, message: discord.Messag
         await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
     else:
         score_process(interaction, message, "add")
-        # if message.author.mention not in scored_members:
-        #     score_func("init", message.author.mention, 1)
-        # else:
-        #     score_func("add", message.author.mention, 1)
-        # print(interaction.user.display_name + " +1 to " + message.author.display_name +
-        #       " @ " + str(datetime.datetime.now()))
     await interaction.response.send_message(str(message.author.display_name) + " +1")
 
 
 @app_commands.checks.cooldown(rate=1, per=60)
 async def ctx_minus_msg(interaction: discord.Interaction, message: discord.Message):
     score_process(interaction, message, "subtract")
-    # if message.author.mention not in scored_members:
-    #     score_func("init", message.author.mention, -1)
-    # else:
-    #     score_func("subtract", message.author.mention, 1)
-    # print(interaction.user.display_name + " -1 to " + message.author.display_name +
-    #       " @ " + str(datetime.datetime.now()))
     if message.author.mention == interaction.user.mention:
         await interaction.response.send_message("I mean, if you really want to...")
         await asyncio.sleep(2)
@@ -127,24 +117,12 @@ async def ctx_plus_usr(interaction: discord.Interaction, member: discord.Member)
         await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
     else:
         score_process(interaction, member, "add")
-        # if member.mention not in scored_members:
-        #     score_func("init", member.mention, 1)
-        # else:
-        #     score_func("add", member.mention, 1)
-        # print(interaction.user.display_name + " +1 to " + member.display_name +
-        #       " @ " + str(datetime.datetime.now()))
     await interaction.response.send_message(str(member.display_name) + " +1")
 
 
 @app_commands.checks.cooldown(rate=1, per=60)
 async def ctx_minus_usr(interaction: discord.Interaction, member: discord.Member):
     score_process(interaction, member, "subtract")
-    # if member.mention not in scored_members:
-    #     score_func("init", member.mention, -1)
-    # else:
-    #     score_func("subtract", member.mention, 1)
-    # print(interaction.user.display_name + " -1 to " + member.display_name +
-    #       " @ " + str(datetime.datetime.now()))
     if member.mention == interaction.user.mention:
         await interaction.response.send_message("I mean, if you really want to...")
         await asyncio.sleep(2)
@@ -188,12 +166,6 @@ class Scores(commands.Cog, name="Scores"):
             await interaction.response.send_message("Trying to boost your own numbers? Shameful!")
         else:
             score_process(interaction, member, "add")
-            # if member.mention not in scored_members:
-            #     score_func("init", member.mention, 1)
-            # else:
-            #     score_func("add", member.mention, 1)
-            # print(interaction.user.display_name + " +1 to " + member.display_name +
-            #       " @ " + str(datetime.datetime.now()))
             await interaction.response.send_message(str(member.display_name) + " +1")
 
     # Let users subtract from other user's scores
@@ -201,12 +173,6 @@ class Scores(commands.Cog, name="Scores"):
     @app_commands.checks.cooldown(rate=1, per=60)
     async def minus(self, interaction: discord.Interaction, member: discord.Member):
         score_process(interaction, member, "subtract")
-        # if member.mention not in scored_members:
-        #     score_func("init", member.mention, -1)
-        # else:
-        #     score_func("subtract", member.mention, 1)
-        # print(interaction.user.display_name + " -1 to " + member.display_name +
-        #       " @ " + str(datetime.datetime.now()))
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("I mean, if you really want to...")
             await asyncio.sleep(2)
