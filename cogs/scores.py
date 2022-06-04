@@ -36,10 +36,8 @@ def score_func(action, member, amount):
 
 # Check performed on thumb reactions to prevent affecting scores using old posts
 def thumb_recency(reaction) -> bool:
-    # Get when the message being thumbed was sent
-    message_time = reaction.message.created_at.replace(tzinfo=None)
     # Get the time between the message being posted and the thumb being given
-    react_delta = datetime.datetime.utcnow() - message_time
+    react_delta = datetime.datetime.utcnow() - reaction.message.created_at.replace(tzinfo=None)
     # The recency defines how old a message has to be to not be valid for thumb reactions
     recency_delta = datetime.timedelta(hours=12)
     return react_delta < recency_delta
