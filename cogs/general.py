@@ -1,3 +1,5 @@
+import enum
+import typing
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -120,6 +122,27 @@ class General(commands.Cog, name="General"):
         # embed.add_field(name="Modpack", value="The 1.12.2 Pack, v. 1.3.4")
         embed.set_footer(text='This server is hosted in the USA by Shockbyte.')
         await interaction.response.send_message(embed=embed)
+
+    # Let users change Bbot's presence
+    @app_commands.command(name="presence", description="Change BBot's Discord presence.")
+    @app_commands.choices(activity_type=[
+        discord.app_commands.Choice(name="Playing", value=1),
+        discord.app_commands.Choice(name="Patching", value=2),
+        discord.app_commands.Choice(name="Competing in", value=3),
+        discord.app_commands.Choice(name="Listening to", value=4)
+    ])
+    # Use mapped values for the different activity types
+    async def presence(self, interaction: discord.Interaction,
+                       activity_type: discord.app_commands.Choice[int], activity: str):
+        switch = {
+            1: discord.ActivityType.playing,
+            2: discord.ActivityType.watching,
+            3: discord.ActivityType.competing,
+            4: discord.ActivityType.listening
+        }
+        await self.bot.change_presence(activity=discord.Activity(
+            type=switch.get(activity_type.value), name=activity))
+        await interaction.response.send_message("Presence updated!", ephemeral=True)
 
 
 async def setup(bot):
