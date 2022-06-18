@@ -7,6 +7,7 @@ import typing
 
 
 class PollEmbed(discord.ui.Modal, title="Build-A-Poll: Embed Title & Description"):
+    # TextInputs to accept the lore title and description, both required
     title_ = discord.ui.TextInput(label="Title:", style=discord.TextStyle.short, required=True)
     description = discord.ui.TextInput(label="Description:", style=discord.TextStyle.long, required=True)
 
@@ -15,8 +16,7 @@ class PollEmbed(discord.ui.Modal, title="Build-A-Poll: Embed Title & Description
 
 
 class PollModal(discord.ui.Modal, title="Build-A-Poll: Choices"):
-    # TextInputs to accept the lore title and description, both required
-    # poll_prompt = discord.ui.TextInput(label="Poll Prompt:", style=discord.TextStyle.short, required=True)
+    # Get poll options, minimum 2, max 4
     opt1 = discord.ui.TextInput(label="Option 1:", style=discord.TextStyle.short, required=True)
     opt2 = discord.ui.TextInput(label="Option 2:", style=discord.TextStyle.short, required=True)
     opt3 = discord.ui.TextInput(label="Option 3:", style=discord.TextStyle.short, required=False)
@@ -24,17 +24,6 @@ class PollModal(discord.ui.Modal, title="Build-A-Poll: Choices"):
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        # embed = discord.Embed(title=self.poll_prompt.value)
-        # embed.add_field(name="First choice:", value=self.opt1, inline=False)
-        # embed.add_field(name="Second choice:", value=self.opt2, inline=False)
-        # if self.opt3.value != "":
-        #     embed.add_field(name="Third choice:", value=self.opt3, inline=False)
-        # if self.opt4.value != "":
-        #     if self.opt3.value == "":
-        #         embed.add_field(name="Third choice:", value=self.opt4, inline=False)
-        #     else:
-        #         embed.add_field(name="Fourth choice", value=self.opt4, inline=False)
-        # await interaction.response.send_message(embed=embed)
 
 
 # UI View
@@ -47,8 +36,7 @@ class Buttons(discord.ui.View):
         self.opt2 = None
         self.opt3 = None
         self.opt4 = None
-        # self.value = ["", ""]
-        self.timeout = 10  # View times out after 20 seconds
+        self.timeout = 60  # View times out after 60 seconds
 
     def build_embed(self):
         embed = discord.Embed(title=self.title,
@@ -64,7 +52,7 @@ class Buttons(discord.ui.View):
                 embed.add_field(name="Fourth choice", value=self.opt4, inline=False)
         return embed
 
-    # Button to delete the lore from the record
+    # Button to add title and description to the embed
     @discord.ui.button(label="Title & Description", style=discord.ButtonStyle.green, custom_id="title_desc")
     # All three arguments are required, function must pass self.view, interaction, self.item
     async def embed_setup(self, interaction: discord.Interaction, button: discord.Button):
@@ -77,6 +65,7 @@ class Buttons(discord.ui.View):
 
         await interaction.edit_original_message(embed=self.build_embed())
 
+    # Button to add choices for the poll
     @discord.ui.button(label="Choices", style=discord.ButtonStyle.blurple, custom_id="choices")
     async def choices(self, interaction: discord.Interaction, button: discord.Button):
         modal = PollModal()
@@ -90,6 +79,14 @@ class Buttons(discord.ui.View):
 
         await interaction.edit_original_message(embed=self.build_embed())
 
+    # Button to complete and post the poll for usage
+    @discord.ui.button(label="Send It!", style=discord.ButtonStyle.grey, custom_id="send_poll")
+    async def send_poll(self, interaction: discord.Interaction, button: discord.Button):
+        for child in self.children:
+            child.disabled = True
+        await interaction.response.edit_message(view=self)
+        self.stop()
+
 
 class Poll(commands.Cog, name="Poll"):
     def __init__(self, bot: commands.Bot):
@@ -100,9 +97,13 @@ class Poll(commands.Cog, name="Poll"):
     async def poll(self, interaction: discord.Interaction):
         view = Buttons()
         embed = discord.Embed(title="Build-A-Poll",
-                              description="Use the buttons to build your poll!")
-        await interaction.response.send_message("What your poll will look like:", embed=embed, view=view)
+                              description="CURRENTLY UNDER DEVELOPMENT, NO FUNCTION GUARANTEED")
+        await interaction.response.send_message("What your poll will look like:",
+                                                embed=embed,
+                                                view=view,
+                                                ephemeral=True)
         await view.wait()
+
 
 
     # @tasks.loop()
