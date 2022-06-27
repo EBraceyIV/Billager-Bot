@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 import typing
+import json
 
 
 class PollEmbed(discord.ui.Modal, title="Build-A-Poll: Embed Title & Description"):
@@ -37,6 +38,7 @@ class Buttons(discord.ui.View):
         self.opt3 = None
         self.opt4 = None
         self.timeout = 60  # View times out after 60 seconds
+        self.embed = None
 
     def build_embed(self):
         embed = discord.Embed(title=self.title,
@@ -62,8 +64,9 @@ class Buttons(discord.ui.View):
 
         self.title = modal.title_.value
         self.desc = modal.description.value
+        self.embed = self.build_embed()
 
-        await interaction.edit_original_message(embed=self.build_embed())
+        await interaction.edit_original_message(embed=self.embed)
 
     # Button to add choices for the poll
     @discord.ui.button(label="Choices", style=discord.ButtonStyle.blurple, custom_id="choices")
@@ -77,7 +80,9 @@ class Buttons(discord.ui.View):
         self.opt3 = modal.opt3.value
         self.opt4 = modal.opt4.value
 
-        await interaction.edit_original_message(embed=self.build_embed())
+        self.embed = self.build_embed()
+
+        await interaction.edit_original_message(embed=self.embed)
 
     # Button to complete and post the poll for usage
     @discord.ui.button(label="Send It!", style=discord.ButtonStyle.grey, custom_id="send_poll")
@@ -91,6 +96,13 @@ class Buttons(discord.ui.View):
 class Poll(commands.Cog, name="Poll"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.GUILD = str(bot.guilds[0].id)
+
+        # Load the channel to output to from the config
+        with open("config.json") as config_json:
+            config = json.load(config_json)
+        # Extract just the id int from the channel call string (<#XXXXXX>)
+        self.poll_channel = int(config[self.GUILD]["poll_channel"][2:-1])
 
     @app_commands.command(name="poll",
                           description="Start a poll! Enter how long it should last and the options to pick from.")
@@ -103,6 +115,7 @@ class Poll(commands.Cog, name="Poll"):
                                                 view=view,
                                                 ephemeral=True)
         await view.wait()
+        await self.bot.get_channel(self.poll_channel).send(embed=view.embed)
 
 
 
