@@ -37,7 +37,7 @@ class Buttons(discord.ui.View):
         self.opt2 = None
         self.opt3 = None
         self.opt4 = None
-        self.timeout = 60  # View times out after 60 seconds
+        self.timeout = 300  # View times out after 60 seconds
         self.embed = None
 
     def build_embed(self):
@@ -51,7 +51,7 @@ class Buttons(discord.ui.View):
             if self.opt3 == "":
                 embed.add_field(name="Option 3️⃣:", value=self.opt4, inline=False)
             else:
-                embed.add_field(name="Option 4️⃣", value=self.opt4, inline=False)
+                embed.add_field(name="Option 4️⃣:", value=self.opt4, inline=False)
         return embed
 
     # Button to add title and description to the embed
@@ -109,7 +109,7 @@ class Poll(commands.Cog, name="Poll"):
     async def poll(self, interaction: discord.Interaction):
         view = Buttons()
         embed = discord.Embed(title="Build-A-Poll",
-                              description="CURRENTLY UNDER DEVELOPMENT, NO FUNCTION GUARANTEED")
+                              description="STILL UNDER DEVELOPMENT, *SOME* FUNCTION GUARANTEED")
         await interaction.response.send_message("What your poll will look like:",
                                                 embed=embed,
                                                 view=view,
