@@ -18,10 +18,10 @@ class PollEmbed(discord.ui.Modal, title="Build-A-Poll: Embed Title & Description
 
 class PollModal(discord.ui.Modal, title="Build-A-Poll: Choices"):
     # Get poll options, minimum 2, max 4
-    opt1 = discord.ui.TextInput(label="Option 1:", style=discord.TextStyle.short, required=True)
-    opt2 = discord.ui.TextInput(label="Option 2:", style=discord.TextStyle.short, required=True)
-    opt3 = discord.ui.TextInput(label="Option 3:", style=discord.TextStyle.short, required=False)
-    opt4 = discord.ui.TextInput(label="Option 4:", style=discord.TextStyle.short, required=False)
+    opt1 = discord.ui.TextInput(label="Option 1️⃣:", style=discord.TextStyle.short, required=True)
+    opt2 = discord.ui.TextInput(label="Option 2️⃣:", style=discord.TextStyle.short, required=True)
+    opt3 = discord.ui.TextInput(label="Option 3️⃣:", style=discord.TextStyle.short, required=False)
+    opt4 = discord.ui.TextInput(label="Option 4️⃣:", style=discord.TextStyle.short, required=False)
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -43,15 +43,15 @@ class Buttons(discord.ui.View):
     def build_embed(self):
         embed = discord.Embed(title=self.title,
                               description=self.desc)
-        embed.add_field(name="First choice:", value=self.opt1, inline=False)
-        embed.add_field(name="Second choice:", value=self.opt2, inline=False)
+        embed.add_field(name="Option 1️⃣:", value=self.opt1, inline=False)
+        embed.add_field(name="Option 2️⃣:", value=self.opt2, inline=False)
         if self.opt3 != "":
-            embed.add_field(name="Third choice:", value=self.opt3, inline=False)
+            embed.add_field(name="Option 3️⃣:", value=self.opt3, inline=False)
         if self.opt4 != "":
             if self.opt3 == "":
-                embed.add_field(name="Third choice:", value=self.opt4, inline=False)
+                embed.add_field(name="Option 3️⃣:", value=self.opt4, inline=False)
             else:
-                embed.add_field(name="Fourth choice", value=self.opt4, inline=False)
+                embed.add_field(name="Option 4️⃣", value=self.opt4, inline=False)
         return embed
 
     # Button to add title and description to the embed
@@ -115,7 +115,11 @@ class Poll(commands.Cog, name="Poll"):
                                                 view=view,
                                                 ephemeral=True)
         await view.wait()
-        await self.bot.get_channel(self.poll_channel).send(embed=view.embed)
+        poll = await self.bot.get_channel(self.poll_channel).send(embed=view.embed)
+
+        option_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
+        for option in range(0, len(poll.embeds[0].fields)):
+            await poll.add_reaction(option_emojis[option])
 
 
 
