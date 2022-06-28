@@ -27,6 +27,14 @@ class PollModal(discord.ui.Modal, title="Build-A-Poll: Choices"):
         await interaction.response.defer()
 
 
+class ColorModal(discord.ui.Modal, title="Build-A-Poll: Color"):
+    # Pick a color to highlight the poll with
+    list_color = discord.ui.Select(options=[discord.SelectOption(label="Red", value=discord.Color.red().value),
+                                            discord.SelectOption(label="Blue", value=discord.Color.blue().value),
+                                            discord.SelectOption(label="Green", value=discord.Color.green().value)],
+                                   max_values=1)
+
+
 # UI View
 class Buttons(discord.ui.View):
     def __init__(self):
@@ -37,12 +45,14 @@ class Buttons(discord.ui.View):
         self.opt2 = None
         self.opt3 = None
         self.opt4 = None
-        self.timeout = 300  # View times out after 60 seconds
+        self.timeout = 300  # View times out after 5 minutes
         self.embed = None
+        self.embed_color = int(discord.Color.default())
 
     def build_embed(self):
         embed = discord.Embed(title=self.title,
-                              description=self.desc)
+                              description=self.desc,
+                              color=self.embed_color)
         embed.add_field(name="Option 1️⃣:", value=self.opt1, inline=False)
         embed.add_field(name="Option 2️⃣:", value=self.opt2, inline=False)
         if self.opt3 != "":
@@ -65,11 +75,12 @@ class Buttons(discord.ui.View):
         self.title = modal.title_.value
         self.desc = modal.description.value
         self.embed = self.build_embed()
+        self.color.disabled = False
 
-        await interaction.edit_original_message(embed=self.embed)
+        await interaction.edit_original_message(embed=self.embed, view=self)
 
     # Button to add choices for the poll
-    @discord.ui.button(label="Choices", style=discord.ButtonStyle.blurple, custom_id="choices")
+    @discord.ui.button(label="Choices", style=discord.ButtonStyle.green, custom_id="choices")
     async def choices(self, interaction: discord.Interaction, button: discord.Button):
         modal = PollModal()
         await interaction.response.send_modal(modal)
@@ -80,6 +91,18 @@ class Buttons(discord.ui.View):
         self.opt3 = modal.opt3.value
         self.opt4 = modal.opt4.value
 
+        self.embed = self.build_embed()
+
+        await interaction.edit_original_message(embed=self.embed)
+
+    # Button to add a color to the poll embed
+    @discord.ui.button(label="Color", style=discord.ButtonStyle.blurple, disabled=True, custom_id="color")
+    async def color(self, interaction: discord.Interaction, button: discord.Button):
+        modal = ColorModal()
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+
+        self.embed_color = int(modal.list_color.values[0])
         self.embed = self.build_embed()
 
         await interaction.edit_original_message(embed=self.embed)
