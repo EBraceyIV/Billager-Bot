@@ -33,6 +33,12 @@ class ColorModal(discord.ui.Modal, title="Build-A-Poll: Color"):
                                             discord.SelectOption(label="Blue", value=discord.Color.blue().value),
                                             discord.SelectOption(label="Green", value=discord.Color.green().value)],
                                    max_values=1)
+    # color = discord.ui.TextInput(label="Enter hex code", style=discord.TextStyle.short, required=True,
+    #                              max_length=6, min_length=6)
+    # test = discord.ui.TextInput(label="TEST", style=discord.TextStyle.short)
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
 
 
 # UI View
@@ -47,7 +53,7 @@ class Buttons(discord.ui.View):
         self.opt4 = None
         self.timeout = 300  # View times out after 5 minutes
         self.embed = None
-        self.embed_color = int(discord.Color.default())
+        self.embed_color = 0
 
     def build_embed(self):
         embed = discord.Embed(title=self.title,
