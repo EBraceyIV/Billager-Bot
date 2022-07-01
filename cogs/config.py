@@ -22,7 +22,7 @@ class Config(commands.Cog, name="Config"):
                                         "poll_channel": ""}}, config_json)
 
     # Set the config setting for various BBot actions, such as the channel certain messages are sent to.
-    @app_commands.command(name="set_config", description="Set one of BBot's configurations.")
+    @app_commands.command(name="config_set", description="Set one of BBot's configurations.")
     @app_commands.describe(config="The bot config setting to define.")
     @app_commands.describe(value="The channel to set the config for.")
     async def set_config(self, interaction: discord.Interaction,
@@ -53,6 +53,19 @@ class Config(commands.Cog, name="Config"):
         elif config == "poll_channel":
             await self.bot.reload_extension("cogs.poll")
             print("Reloaded cog: poll.py")
+
+    @app_commands.command(name="config_check", description="Check one of BBot's configurations.")
+    @app_commands.describe(config="The bot config setting to check.")
+    async def set_config(self, interaction: discord.Interaction,
+                         config: typing.Literal["test", "star_channel", "callout_channel", "poll_channel"]):
+        # Start by loading the config json as a dictionary
+        with open("config.json") as config_json:
+            config_json = json.load(config_json)
+
+        value = config_json[self.GUILD][config]
+
+        # Send message to confirm the config has been updated
+        await interaction.response.send_message("Config for `" + config + "` set to " + value)
 
 
 async def setup(bot):
