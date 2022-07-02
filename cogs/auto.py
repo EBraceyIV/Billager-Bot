@@ -1,10 +1,12 @@
-from zoneinfo import ZoneInfo
+import datetime
+import random
+import shelve
 
 import discord
+import requests
+from bs4 import BeautifulSoup
+from discord import app_commands
 from discord.ext import commands, tasks
-import random
-import datetime
-import shelve
 
 
 class Auto(commands.Cog, name="Auto"):
@@ -64,6 +66,26 @@ class Auto(commands.Cog, name="Auto"):
             plus_minus.close()
         else:
             return
+
+    # # On the night of a full moon, Billager becomes the Wolfager
+    # @tasks.loop(time=datetime.time(23, 0, 0))
+    # async def werewolf(self):
+    #     # Get the day / month / year, prepending a 0 if needed as the url uses leading zeroes
+    #     day = str(datetime.date.today().day) if datetime.date.today().day >= 10 else "0" + str(datetime.date.today().day)
+    #     month = str(datetime.date.today().month) if datetime.date.today().month >= 10 else "0" + str(datetime.date.today().month)
+    #     year = str(datetime.date.today().year)
+    #
+    #     # Scrape the HTML from this moon phase website
+    #     URL = "https://www.moongiant.com/phase/" + month + "/" + day + "/" + year + "/"
+    #     page = requests.get(URL)
+    #     soup = BeautifulSoup(page.content, "html.parser")
+    #     results = soup.find(id="moonDetails")
+    #
+    #     # If the phase of the moon is full, change the bot avatar
+    #     if "Full Moon" in results.find_next("span"):
+    #         with open("wolfager.png", "rb") as img:
+    #             avatar = img.read()
+    #         await self.bot.user.edit(avatar=avatar)
 
 
 async def setup(bot):
