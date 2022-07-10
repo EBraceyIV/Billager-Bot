@@ -27,7 +27,8 @@ class Config(commands.Cog, name="Config"):
     @app_commands.describe(config="The bot config setting to define.")
     @app_commands.describe(value="The channel to set the config for.")
     async def set_config(self, interaction: discord.Interaction,
-                         config: typing.Literal["test", "star_channel", "callout_channel", "poll_channel"],
+                         config: typing.Literal["test", "star_channel", "callout_channel", "poll_channel",
+                                                "wolf_channel"],
                          value: str):
 
         # Start by loading the config json as a dictionary
@@ -60,7 +61,7 @@ class Config(commands.Cog, name="Config"):
 
     @app_commands.command(name="config_check", description="Check one of BBot's configurations.")
     @app_commands.describe(config="The bot config setting to check.")
-    async def set_config(self, interaction: discord.Interaction,
+    async def check_config(self, interaction: discord.Interaction,
                          config: typing.Literal["test", "star_channel", "callout_channel", "poll_channel"]):
         # Start by loading the config json as a dictionary
         with open("config.json") as config_json:
