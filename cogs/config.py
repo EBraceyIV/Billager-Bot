@@ -19,7 +19,8 @@ class Config(commands.Cog, name="Config"):
                 json.dump({self.GUILD: {"test": "",
                                         "star_channel": "",
                                         "callout_channel": "",
-                                        "poll_channel": ""}}, config_json)
+                                        "poll_channel": "",
+                                        "wolf_channel": ""}}, config_json)
 
     # Set the config setting for various BBot actions, such as the channel certain messages are sent to.
     @app_commands.command(name="config_set", description="Set one of BBot's configurations.")
@@ -53,6 +54,9 @@ class Config(commands.Cog, name="Config"):
         elif config == "poll_channel":
             await self.bot.reload_extension("cogs.poll")
             print("Reloaded cog: poll.py")
+        elif config == "wolf_channel":
+            await self.bot.reload_extension("cogs.auto")
+            print("Reloaded cog: auto.py")
 
     @app_commands.command(name="config_check", description="Check one of BBot's configurations.")
     @app_commands.describe(config="The bot config setting to check.")
