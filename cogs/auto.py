@@ -109,6 +109,8 @@ class Auto(commands.Cog, name="Auto"):
         # Update the avatar and announce Wolfager's arrival
         await self.update_avatar(Path("avatars/wolfager.png"))
         await self.bot.get_channel(self.wolf_channel).send("**AWOOOOOOOOOO**\nThe *Wolfager* prowls tonight.")
+        await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
+                                       name="the howls of the pack."))
         self.werewolf_activity.start()
 
     @tasks.loop(hours=0, minutes=12, count=7)
