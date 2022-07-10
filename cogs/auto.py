@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import random
 import shelve
-
+import json
 import discord
 import requests
 from bs4 import BeautifulSoup
@@ -16,6 +16,20 @@ class Auto(commands.Cog, name="Auto"):
         self.bot = bot
         self.callout.start()
         self.score_reset.start()
+        self.werewolf.start()
+        self.GUILD = str(bot.guilds[0].id)
+
+        # Load the channel to output to from the config
+        with open("config.json") as config_json:
+            config = json.load(config_json)
+        # Extract just the id int from the channel call string (<#XXXXXX>)
+        self.wolf_channel = int(config[self.GUILD]["wolf_channel"][2:-1])
+
+    async def update_avatar(self, path):
+        with open(path, "rb") as img:
+            avatar = img.read()
+        await self.bot.user.edit(avatar=avatar)
+        img.close()
 
     # Check every message that comes through and perform a hog-check
     @commands.Cog.listener("on_message")
@@ -70,34 +84,43 @@ class Auto(commands.Cog, name="Auto"):
             return
 
     # On the night of a full moon, Billager becomes the Wolfager
-    # @tasks.loop(time=datetime.time(23, 0, 0))
-    # async def werewolf(self):
-    # @app_commands.command(name="wolf")
-    # async def werewolf(self, interaction: discord.Interaction, day: str):
+    @tasks.loop(time=datetime.time(1, 0, 0))  # 9 P.M. EST
+    async def werewolf(self):
         # Get the day / month / year, prepending a 0 if needed as the url uses leading zeroes
-        # day = str(datetime.date.today().day) if datetime.date.today().day >= 10 else "0" + str(datetime.date.today().day)
-        # month = str(datetime.date.today().month) if datetime.date.today().month >= 10 else "0" + str(datetime.date.today().month)
-        # year = str(datetime.date.today().year)
-        #
-        # # Scrape the HTML from this moon phase website
-        # URL = "https://www.moongiant.com/phase/" + month + "/" + day + "/" + year + "/"
-        # page = requests.get(URL)
-        # soup = BeautifulSoup(page.content, "html.parser")
-        # results = soup.find(id="moonDetails")
-        #
-        # # If the phase of the moon is full, change the bot avatar
-        # if "Full Moon" in results.find_next("span"):
-        #     with open(Path("avatars/wolfager.png"), "rb") as img:
-        #         avatar = img.read()
-        #     await self.bot.user.edit(avatar=avatar)
-        #     img.close()
-        #     await interaction.response.send_message("AWOOOOOOOOOO")
-        # else:
-        #     with open(Path("avatars/billager.png"), "rb") as img:
-        #         avatar = img.read()
-        #     await self.bot.user.edit(avatar=avatar)
-        #     img.close()
-        #     await interaction.response.send_message("borf")
+        day = str(datetime.date.today().day) if datetime.date.today().day >= 10 \
+            else "0" + str(datetime.date.today().day)
+        month = str(datetime.date.today().month) if datetime.date.today().month >= 10 \
+            else "0" + str(datetime.date.today().month)
+        year = str(datetime.date.today().year)
+
+        # Scrape the HTML from this moon phase website
+        url = "https://www.moongiant.com/phase/" + month + "/" + day + "/" + year + "/"
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, "html.parser")
+        results = soup.find(id="moonDetails")
+
+        # If the phase of the moon is full, run the werewolf sequence
+        if "Full Moon" in results.find_next("span"):
+            self.werewolf_run.start()
+
+    # Duration of the werewolf transformation
+    @tasks.loop(hours=9, minutes=55, count=1)  # This will add to ten hours, returning BBot to normal at 7 A.M. EST
+    async def werewolf_run(self):
+        # Update the avatar and announce Wolfager's arrival
+        await self.update_avatar(Path("avatars/wolfager.png"))
+        await self.bot.get_channel(self.wolf_channel).send("**AWOOOOOOOOOO**\nThe *Wolfager* prowls tonight.")
+
+    # Billager returns to normal after his Wolfager sabbatical
+    @werewolf_run.after_loop
+    async def werewolf_done(self):
+        # Change the avatar back to normal
+        await self.update_avatar(Path("avatars/billager.png"))
+        # Give a buffer for the change to show up in the sidebar / chat log
+        await asyncio.sleep(300)
+        # Some thoughtful commentary from BBot on the situation
+        await self.bot.get_channel(self.wolf_channel).send("*coughs up a filthy werewolf hairball*\n"
+                                                           "Isabelle, clear my calendar for the day and book me for "
+                                                           "a flea bath at Shampoodle immediately.")
 
 
 async def setup(bot):
