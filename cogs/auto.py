@@ -109,12 +109,26 @@ class Auto(commands.Cog, name="Auto"):
         # Update the avatar and announce Wolfager's arrival
         await self.update_avatar(Path("avatars/wolfager.png"))
         await self.bot.get_channel(self.wolf_channel).send("**AWOOOOOOOOOO**\nThe *Wolfager* prowls tonight.")
+        self.werewolf_activity.start()
+
+    @tasks.loop(hours=0, minutes=12, count=7)
+    async def werewolf_activity(self):
+        actions = ["I have the urge to visit London for a big dish of beef chow mein",
+                   "c!play werewolves of london",
+                   "Hey anyone wanna watch Wolfcop?",
+                   "**BARK BARK BARK BARK BARK**",
+                   "I have the urge to drink a piña colada at Trader Vic's"]
+        await self.bot.get_channel(self.wolf_channel).send(random.choice(actions))
+        self.werewolf_activity.change_interval(hours=random.randint(0, 1), minutes=random.randint(0, 45))
 
     # Billager returns to normal after his Wolfager sabbatical
     @werewolf_run.after_loop
     async def werewolf_done(self):
         # Change the avatar back to normal
         await self.update_avatar(Path("avatars/billager.png"))
+        # Stop the werewolf activity loop if it might still be running
+        if self.werewolf_activity.is_running():
+            self.werewolf_activity.stop()
         # Give a buffer for the change to show up in the sidebar / chat log
         await asyncio.sleep(300)
         # Some thoughtful commentary from BBot on the situation
