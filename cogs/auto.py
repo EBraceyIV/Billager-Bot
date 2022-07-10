@@ -110,7 +110,7 @@ class Auto(commands.Cog, name="Auto"):
         await self.update_avatar(Path("avatars/wolfager.png"))
         await self.bot.get_channel(self.wolf_channel).send("**AWOOOOOOOOOO**\nThe *Wolfager* prowls tonight.")
         await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
-                                       name="the howls of the pack."))
+                                                                 name="the howls of the pack."))
         self.werewolf_activity.start()
 
     @tasks.loop(hours=0, minutes=12, count=7)
@@ -133,6 +133,9 @@ class Auto(commands.Cog, name="Auto"):
             self.werewolf_activity.stop()
         # Give a buffer for the change to show up in the sidebar / chat log
         await asyncio.sleep(300)
+        # Return the activity to normal
+        await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
+                                                                 name="with his axe."))
         # Some thoughtful commentary from BBot on the situation
         await self.bot.get_channel(self.wolf_channel).send("*coughs up a filthy werewolf hairball*\n"
                                                            "Isabelle, clear my calendar for the day and book me for "
