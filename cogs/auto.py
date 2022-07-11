@@ -109,11 +109,14 @@ class Auto(commands.Cog, name="Auto"):
         # Update the avatar/presence/nickname and announce Wolfager's arrival
         await self.update_avatar(Path("avatars/wolfager.png"))
         await self.bot.guilds[0].me.edit(nick="Wolfager Bot🪓")
-        await self.bot.get_channel(self.wolf_channel).send("**AWOOOOOOOOOO**\nThe *Wolfager* prowls tonight.")
+        await self.bot.get_channel(self.wolf_channel).send("**AWOOOOOOOOOO**")
+        await self.bot.get_channel(self.wolf_channel).send("The *Wolfager* prowls under the full moon tonight.")
         await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
                                                                  name="the howls of the pack."))
+        # Run the activity loop
         self.werewolf_activity.start()
 
+    # Activity for the Wolfager to do to add some life to him
     @tasks.loop(hours=0, minutes=1, count=8)
     async def werewolf_activity(self):
         actions = ["I have the urge to visit London for a big dish of beef chow mein",
@@ -121,10 +124,10 @@ class Auto(commands.Cog, name="Auto"):
                    "Hey anyone wanna watch Wolfcop?",
                    "**BARK BARK BARK BARK BARK**",
                    "I have the urge to drink a piña colada at Trader Vic's"]
+        # Only run starting on the "second" loop, since the first would trigger immediately
         if self.werewolf.current_loop != 0:
             self.werewolf_activity.change_interval(hours=random.randint(0, 1), minutes=random.randint(0, 45))
             await self.bot.get_channel(self.wolf_channel).send(random.choice(actions))
-
 
     # Billager returns to normal after his Wolfager sabbatical
     @werewolf_run.after_loop
@@ -141,8 +144,8 @@ class Auto(commands.Cog, name="Auto"):
         # Give a buffer for the change to show up in the sidebar / chat log
         await asyncio.sleep(30)
         # Some thoughtful commentary from BBot on the situation
-        await self.bot.get_channel(self.wolf_channel).send("*coughs up a filthy werewolf hairball*\n"
-                                                           "Isabelle, clear my calendar for the day and book me for "
+        await self.bot.get_channel(self.wolf_channel).send("*coughs up a filthy werewolf hairball*")
+        await self.bot.get_channel(self.wolf_channel).send("Isabelle, clear my calendar for the day and book me for "
                                                            "a flea bath at Shampoodle immediately.")
 
 
