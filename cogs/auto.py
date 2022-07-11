@@ -104,10 +104,11 @@ class Auto(commands.Cog, name="Auto"):
             self.werewolf_run.start()
 
     # Duration of the werewolf transformation
-    @tasks.loop(hours=9, minutes=55, count=1)  # This will add to ten hours, returning BBot to normal at 7 A.M. EST
+    @tasks.loop(hours=9, minutes=45, count=1)  # This will add to ten hours, returning BBot to normal at 7 A.M. EST
     async def werewolf_run(self):
-        # Update the avatar and announce Wolfager's arrival
+        # Update the avatar/presence/nickname and announce Wolfager's arrival
         await self.update_avatar(Path("avatars/wolfager.png"))
+        await self.bot.guilds[0].me.edit(nick="Wolfager Bot🪓")
         await self.bot.get_channel(self.wolf_channel).send("**AWOOOOOOOOOO**\nThe *Wolfager* prowls tonight.")
         await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
                                                                  name="the howls of the pack."))
@@ -131,11 +132,12 @@ class Auto(commands.Cog, name="Auto"):
         # Stop the werewolf activity loop if it might still be running
         if self.werewolf_activity.is_running():
             self.werewolf_activity.stop()
-        # Give a buffer for the change to show up in the sidebar / chat log
-        await asyncio.sleep(300)
-        # Return the activity to normal
+        # Return the activity and nickname to normal
         await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing,
                                                                  name="with his axe."))
+        await self.bot.guilds[0].me.edit(nick="Billager Bot🪓")
+        # Give a buffer for the change to show up in the sidebar / chat log
+        await asyncio.sleep(30)
         # Some thoughtful commentary from BBot on the situation
         await self.bot.get_channel(self.wolf_channel).send("*coughs up a filthy werewolf hairball*\n"
                                                            "Isabelle, clear my calendar for the day and book me for "
