@@ -114,7 +114,7 @@ class Auto(commands.Cog, name="Auto"):
                                                                  name="the howls of the pack."))
         self.werewolf_activity.start()
 
-    @tasks.loop(hours=0, minutes=12, count=7)
+    @tasks.loop(hours=0, minutes=1, count=8)
     async def werewolf_activity(self):
         actions = ["I have the urge to visit London for a big dish of beef chow mein",
                    "c!play werewolves of london",
@@ -122,7 +122,8 @@ class Auto(commands.Cog, name="Auto"):
                    "**BARK BARK BARK BARK BARK**",
                    "I have the urge to drink a piña colada at Trader Vic's"]
         await self.bot.get_channel(self.wolf_channel).send(random.choice(actions))
-        self.werewolf_activity.change_interval(hours=random.randint(0, 1), minutes=random.randint(0, 45))
+        if self.werewolf.current_loop != 0:
+            self.werewolf_activity.change_interval(hours=random.randint(0, 1), minutes=random.randint(0, 45))
 
     # Billager returns to normal after his Wolfager sabbatical
     @werewolf_run.after_loop
