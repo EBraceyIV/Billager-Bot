@@ -121,9 +121,10 @@ class Auto(commands.Cog, name="Auto"):
                    "Hey anyone wanna watch Wolfcop?",
                    "**BARK BARK BARK BARK BARK**",
                    "I have the urge to drink a piña colada at Trader Vic's"]
-        await self.bot.get_channel(self.wolf_channel).send(random.choice(actions))
         if self.werewolf.current_loop != 0:
             self.werewolf_activity.change_interval(hours=random.randint(0, 1), minutes=random.randint(0, 45))
+            await self.bot.get_channel(self.wolf_channel).send(random.choice(actions))
+
 
     # Billager returns to normal after his Wolfager sabbatical
     @werewolf_run.after_loop
