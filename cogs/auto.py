@@ -125,7 +125,7 @@ class Auto(commands.Cog, name="Auto"):
                    "**BARK BARK BARK BARK BARK**",
                    "I have the urge to drink a piña colada at Trader Vic's"]
         # Only run starting on the "second" loop, since the first would trigger immediately
-        if self.werewolf.current_loop != 0:
+        if self.werewolf_activity.current_loop != 0:
             self.werewolf_activity.change_interval(hours=random.randint(0, 1), minutes=random.randint(0, 45))
             await self.bot.get_channel(self.wolf_channel).send(random.choice(actions))
 
