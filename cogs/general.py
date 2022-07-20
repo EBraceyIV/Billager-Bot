@@ -144,6 +144,44 @@ class General(commands.Cog, name="General"):
             type=switch.get(activity_type.value), name=activity))
         await interaction.response.send_message("Presence updated!", ephemeral=True)
 
+    # Provide the BillagerCloud access embed
+    @app_commands.command(name="cloud", description="Get the link to BillagerCloud.")
+    async def cloud(self, interaction: discord.Interaction):
+        # Provide the link and general explanation
+        embed = discord.Embed(title="BillagerCloud",
+                              description="You can access BillagerCloud by clicking [here]"
+                                          "(http://quickconnect.to/billagercloud).\n"
+                                          "BillagerCloud is a privately managed cloud service of sorts. Access the "
+                                          "shared of private files and other interesting services. For instance:",
+                              color=discord.Color.teal())
+
+        # Info on the file station
+        embed.add_field(name="File Station", value="Files, files, files. Plenty of space to keep anything you need. "
+                                                   "Users get a personal folder as well as access to "
+                                                   "`files_with_friends`, the public shared folder.",
+                        inline=False)
+
+        # Info on the video station
+        embed.add_field(name="Video Station", value="Enjoy the multitude of content available on this on-demand"
+                                                    "media server. Movies and TV not beholden to Big Streaming.",
+                        inline=False)
+
+        # Tell them to sign up if interested
+        embed.add_field(name="How do I use?", value="Just provide my handler a valid email address so that an account "
+                                                    "can be registered in the system.",
+                        inline=False)
+
+        # Some options to spice up the footnote
+        flavor_text = ["Not gluten free.", "May contain dairy.", "Does not accept EBT.", "Cannot open pod bay doors.",
+                       "Satisfaction recommended, but not guaranteed.", "A Clatterbox subsidiary service.",
+                       "No really, be careful, it might bite.", "This hardware purchased on sale.",
+                       "May contain nuts.", "Especially on a full moon."]
+
+        # Footnote for disclosure/humor
+        embed.set_footer(text="BillagerCloud operates on Synology DSM. Use at own risk. " + random.choice(flavor_text))
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 async def setup(bot):
     await bot.add_cog(General(bot), guild=discord.Object(id=bot.guilds[0].id))
