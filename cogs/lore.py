@@ -77,31 +77,20 @@ class LoreTabs(discord.ui.View):
     def __init__(self):
         super().__init__()
         self.page = 1
-    # options = [discord.SelectOption(label="test 1"),
-    #            discord.SelectOption(label="test 2"),
-    #            discord.SelectOption(label="test 3"),
-    #            discord.SelectOption(label="test 4"),
-    #            discord.SelectOption(label="test 5"),
-    #            discord.SelectOption(label="test 6"),
-    #            discord.SelectOption(label="test 7"),
-    #            discord.SelectOption(label="test 8"),
-    #            discord.SelectOption(label="test 9"),
-    #            discord.SelectOption(label="test 10")
-    #            ]
 
     all_options = []
-    for i in range(10):
-        all_options.append(discord.SelectOption(label="test " + str((i + 1))))
+    for lore in all_lore:
+        all_options.append(discord.SelectOption(label=lore_access("retrieve", lore, None).title))
 
     @discord.ui.select(placeholder="random", min_values=1, max_values=1, row=1, custom_id="lore_dropdown",
-                       options=all_options[0:3])
+                       options=all_options[0:5])
     async def lore_select(self, interaction: discord.Interaction, select: discord.ui.Select):
         await interaction.response.send_message(select.values[0])
 
     @discord.ui.button(style=discord.ButtonStyle.gray, emoji="◀", custom_id="left_button", row=2, disabled=True)
     async def left(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.page -= 1
-        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 3: self.page * 3]
+        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 6: self.page * 6]
         if self.page == 1:
             self.left.disabled = True
         if self.right.disabled:
@@ -113,8 +102,8 @@ class LoreTabs(discord.ui.View):
         self.page += 1
         if self.page > 1:
             self.left.disabled = False
-        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 3: self.page * 3]
-        if len(self.lore_select.options) < 3:
+        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 5: self.page * 5]
+        if len(self.lore_select.options) < 5:
             self.right.disabled = True
         await interaction.response.edit_message(view=self)
 
