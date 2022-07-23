@@ -90,7 +90,12 @@ class LoreTabs(discord.ui.View):
     @discord.ui.select(placeholder="Pick your lore! 10 listed per page.", min_values=1, max_values=1, row=1,
                        custom_id="lore_dropdown", options=all_options[0:10])
     async def lore_select(self, interaction: discord.Interaction, select: discord.ui.Select):
-        await interaction.response.send_message(embed=lore_access("retrieve", select.values[0].lower(), None))
+        try:
+            await interaction.response.send_message(embed=lore_access("retrieve", select.values[0].lower(), None))
+        except KeyError:
+            await interaction.response.send_message(embed=lore_access("retrieve", select.values[0], None))
+        else:
+            pass
 
     # Previous page button, loads prior ten lore entries
     @discord.ui.button(style=discord.ButtonStyle.gray, emoji="◀", custom_id="left_button", row=2, disabled=True)
