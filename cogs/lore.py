@@ -73,6 +73,52 @@ class Confirm(discord.ui.View):
         self.stop()
 
 
+class LoreTabs(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.page = 1
+    # options = [discord.SelectOption(label="test 1"),
+    #            discord.SelectOption(label="test 2"),
+    #            discord.SelectOption(label="test 3"),
+    #            discord.SelectOption(label="test 4"),
+    #            discord.SelectOption(label="test 5"),
+    #            discord.SelectOption(label="test 6"),
+    #            discord.SelectOption(label="test 7"),
+    #            discord.SelectOption(label="test 8"),
+    #            discord.SelectOption(label="test 9"),
+    #            discord.SelectOption(label="test 10")
+    #            ]
+
+    all_options = []
+    for i in range(10):
+        all_options.append(discord.SelectOption(label="test " + str((i + 1))))
+
+    @discord.ui.select(placeholder="random", min_values=1, max_values=1, row=1, custom_id="lore_dropdown",
+                       options=all_options[0:3])
+    async def lore_select(self, interaction: discord.Interaction, select: discord.ui.Select):
+        await interaction.response.send_message(select.values[0])
+
+    @discord.ui.button(style=discord.ButtonStyle.gray, emoji="◀", custom_id="left_button", row=2, disabled=True)
+    async def left(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.page -= 1
+        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 3: self.page * 3]
+        if self.page == 1:
+            self.left.disabled = True
+        if self.right.disabled:
+            self.right.disabled = False
+        await interaction.response.edit_message(view=self)
+
+    @discord.ui.button(style=discord.ButtonStyle.gray, emoji="▶", custom_id="right_button", row=2)
+    async def right(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.page += 1
+        if self.page > 1:
+            self.left.disabled = False
+        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 3: self.page * 3]
+        if len(self.lore_select.options) < 3:
+            self.right.disabled = True
+        await interaction.response.edit_message(view=self)
+
+
 # Use a modal to make lore entry more user friendly than typing everything in the message line as arguments
 class AddLoreModal(discord.ui.Modal, title="Add Lore"):
     # TextInputs to accept the lore title and description, both required
@@ -151,15 +197,18 @@ class Lore(commands.Cog):
 
     # Display the requested piece of lore, or a random piece if none is specified
     @app_commands.command(name='lore', description="View some enjoyable server lore.")
-    async def lore(self, interaction: discord.Interaction, *, lore_title: typing.Optional[str]):
-        lore_title = random.choice(all_lore) if lore_title is None else lore_title.lower()
-        if lore_title not in all_lore:
-            await interaction.response.send_message(
-                "You must be from a different timeline (or really bad at spelling) because we don't have "
-                "that lore on record.")
-            return
-        embed = lore_access("retrieve", lore_title, None)
-        await interaction.response.send_message(embed=embed)
+    async def lore(self, interaction: discord.Interaction): #, *, lore_title: typing.Optional[str]):
+        # lore_title = random.choice(all_lore) if lore_title is None else lore_title.lower()
+        # if lore_title not in all_lore:
+        #     await interaction.response.send_message(
+        #         "You must be from a different timeline (or really bad at spelling) because we don't have "
+        #         "that lore on record.")
+        #     return
+        # embed = lore_access("retrieve", lore_title, None)
+        # await interaction.response.send_message(embed=embed)
+        view = LoreTabs()
+        await interaction.response.send_message(view=view)
+        await view.wait()
 
     # Display a list of all lore currently stored
     @app_commands.command(name="lore_board", description="See a list of all available lore.")
