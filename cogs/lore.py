@@ -73,42 +73,51 @@ class Confirm(discord.ui.View):
         self.stop()
 
 
+# UI View to make picking out lore to read easier via dropdown menu
 class LoreTabs(discord.ui.View):
     def __init__(self):
         super().__init__()
-        self.page = 1
-        self.timeout = 60
-        self.response = None
+        self.page = 1  # Start on the first page
+        self.timeout = 60  # One minute timeout
+        self.response = None  # This is defined as the original interaction response the view was given to
 
+    # Fill the dropdown options list with all the lore on record
     all_options = []
     for lore in all_lore:
         all_options.append(discord.SelectOption(label=lore_access("retrieve", lore, None).title))
 
+    # Dropdown menu that lists all lore, 10 at a time
     @discord.ui.select(placeholder="Pick your lore! 10 listed per page.", min_values=1, max_values=1, row=1,
                        custom_id="lore_dropdown", options=all_options[0:10])
     async def lore_select(self, interaction: discord.Interaction, select: discord.ui.Select):
         await interaction.response.send_message(embed=lore_access("retrieve", select.values[0].lower(), None))
 
+    # Previous page button, loads prior ten lore entries
     @discord.ui.button(style=discord.ButtonStyle.gray, emoji="◀", custom_id="left_button", row=2, disabled=True)
     async def left(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.page -= 1
-        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 10: self.page * 10]
+        self.page -= 1  # Move back one page
+        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 10: self.page * 10]  # Update lore offered
+        # Handling for button (dis)abling based on current page, e.g., can't go left of page one / right past last page
         if self.page == 1:
             self.left.disabled = True
-        if self.right.disabled:
+        if self.right.disabled:  # If right button is disabled, can only go back
             self.right.disabled = False
         await interaction.response.edit_message(view=self)
 
+    # Next page button, loads next ten lore entries
     @discord.ui.button(style=discord.ButtonStyle.gray, emoji="▶", custom_id="right_button", row=2)
     async def right(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.page += 1
+        self.page += 1  # Move forward one page
+        # Enable back button if there are previous pages
         if self.page > 1:
             self.left.disabled = False
-        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 10: self.page * 10]
+        self.lore_select.options = LoreTabs.all_options[(self.page - 1) * 10: self.page * 10]  # Update lore offered
+        # If the last page isn't fully populated, can't go any further
         if len(self.lore_select.options) < 10:
             self.right.disabled = True
         await interaction.response.edit_message(view=self)
 
+    # One a timeout, disable everything and inform user for clarity
     async def on_timeout(self) -> None:
         for child in self.children:
             child.disabled = True
@@ -194,17 +203,11 @@ class Lore(commands.Cog):
 
     # Display the requested piece of lore, or a random piece if none is specified
     @app_commands.command(name='lore', description="View some enjoyable server lore.")
-    async def lore(self, interaction: discord.Interaction): #, *, lore_title: typing.Optional[str]):
-        # lore_title = random.choice(all_lore) if lore_title is None else lore_title.lower()
-        # if lore_title not in all_lore:
-        #     await interaction.response.send_message(
-        #         "You must be from a different timeline (or really bad at spelling) because we don't have "
-        #         "that lore on record.")
-        #     return
-        # embed = lore_access("retrieve", lore_title, None)
-        # await interaction.response.send_message(embed=embed)
+    async def lore(self, interaction: discord.Interaction):
+        # Define and send the message view
         view = LoreTabs()
         await interaction.response.send_message(view=view)
+        # Provide the view with the interaction response for usage
         view.response = await interaction.original_message()
         await view.wait()
 
@@ -270,18 +273,6 @@ class Lore(commands.Cog):
             await interaction.edit_original_message(content="The deed is done.", view=None)
         else:
             await interaction.edit_original_message(content="LAME", view=None)
-
-    # # AUTOCOM LIST ONLY SUPPORTS UP TO 25 ENTRIES
-    # # SO THIS MAY NEED TO BE REMOVED OR FIXED WITH A WEIRD WORKAROUND
-    # # Consider breaking total number into sets of 25 and navigate "pages" using UI kit buttons
-    # @lore.autocomplete("lore_title")
-    # @edit_lore.autocomplete("lore_title")
-    # async def lore_title_autocomplete(self,
-    #                                   interaction: discord.Interaction,
-    #                                   current: str) -> list[app_commands.Choice[str]]:
-    #     lore_titles = all_lore
-    #     return [app_commands.Choice(name=lore_title, value=lore_title)
-    #             for lore_title in lore_titles if current.lower() in lore_title.lower()]
 
 
 async def setup(bot):
