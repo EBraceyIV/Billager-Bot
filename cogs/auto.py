@@ -17,6 +17,7 @@ class Auto(commands.Cog, name="Auto"):
         self.callout.start()
         self.score_reset.start()
         self.werewolf.start()
+        self.lore_backup.start()
         self.GUILD = str(bot.guilds[0].id)
 
         # Load the channel to output to from the config
@@ -82,6 +83,26 @@ class Auto(commands.Cog, name="Auto"):
             plus_minus.close()
         else:
             return
+
+    # Daily lore backup, every 24 hours starting from launch
+    @tasks.loop(hours=24)
+    async def lore_backup(self):
+        # Load the lore and init a dict to export
+        all_lore = shelve.open("loreKeeper")
+        lore_backup = {}
+
+        # Assign each embed (as a dict) to its respective key (title) in a dict
+        for key, value in all_lore.items():
+            lore_backup[key] = value.to_dict()
+
+        # Export the fully populated dict as a .txt file
+        with open("lore_backup.txt", "w") as backup_file:
+            backup_file.write(json.dumps(lore_backup))
+
+        # Close files and log that lore was backed up, with timestamp
+        all_lore.close()
+        backup_file.close()
+        print("Lore backed up: " + str(datetime.datetime.now()))
 
     # On the night of a full moon, Billager becomes the Wolfager
     @tasks.loop(time=datetime.time(1, 0, 0))  # 9 P.M. EST
