@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import typing
 import discord
@@ -45,6 +46,7 @@ class ColorModal(discord.ui.Modal, title="Build-A-Poll: Color"):
 class Buttons(discord.ui.View):
     def __init__(self):
         super().__init__()
+        self.response = None
         self.title = None
         self.desc = None
         self.opt1 = None
@@ -52,6 +54,7 @@ class Buttons(discord.ui.View):
         self.opt3 = None
         self.opt4 = None
         self.timeout = 300  # View times out after 5 minutes
+        self.timed_out = False
         self.embed = None
         self.embed_color = 0
 
@@ -122,6 +125,13 @@ class Buttons(discord.ui.View):
         await interaction.response.edit_message(view=self)
         self.stop()
 
+    # If poll builder times out, disable the UI and retain the timed_out state for handling
+    async def on_timeout(self) -> None:
+        self.timed_out = True
+        for child in self.children:
+            child.disabled = True
+        await self.response.edit(view=self)
+
 
 class Poll(commands.Cog, name="Poll"):
     def __init__(self, bot: commands.Bot):
@@ -144,14 +154,17 @@ class Poll(commands.Cog, name="Poll"):
                                                 embed=embed,
                                                 view=view,
                                                 ephemeral=True)
+        view.response = await interaction.original_message()
         await view.wait()
-        poll = await self.bot.get_channel(self.poll_channel).send(embed=view.embed)
+        await asyncio.sleep(1)  # Wait just a second for the on_timeout function to run after the view stops
 
-        option_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
-        for option in range(0, len(poll.embeds[0].fields)):
-            await poll.add_reaction(option_emojis[option])
+        # If the view timed out, don't post the poll, probably unfinished
+        if not view.timed_out:
+            poll = await self.bot.get_channel(self.poll_channel).send(embed=view.embed)
 
-
+            option_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
+            for option in range(0, len(poll.embeds[0].fields)):
+                await poll.add_reaction(option_emojis[option])
 
     # @tasks.loop()
     # async def test(self):
