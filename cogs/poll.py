@@ -29,12 +29,12 @@ class PollModal(discord.ui.Modal, title="Build-A-Poll: Choices"):
 
 class ColorModal(discord.ui.Modal, title="Build-A-Poll: Color"):
     # Pick a color to highlight the poll with
-    list_color = discord.ui.Select(options=[discord.SelectOption(label="Red", value=discord.Color.red().value),
-                                            discord.SelectOption(label="Blue", value=discord.Color.blue().value),
-                                            discord.SelectOption(label="Green", value=discord.Color.green().value)],
-                                   max_values=1)
-    # color = discord.ui.TextInput(label="Enter hex code", style=discord.TextStyle.short, required=True,
-    #                              max_length=6, min_length=6)
+    # list_color = discord.ui.Select(options=[discord.SelectOption(label="Red", value=discord.Color.red().value),
+    #                                         discord.SelectOption(label="Blue", value=discord.Color.blue().value),
+    #                                         discord.SelectOption(label="Green", value=discord.Color.green().value)],
+    #                                max_values=1)
+    hex_color = discord.ui.TextInput(label="Enter RGB code", style=discord.TextStyle.short, required=True,
+                                     max_length=6, min_length=6)
     # test = discord.ui.TextInput(label="TEST", style=discord.TextStyle.short)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
@@ -108,7 +108,8 @@ class Buttons(discord.ui.View):
         await interaction.response.send_modal(modal)
         await modal.wait()
 
-        self.embed_color = int(modal.list_color.values[0])
+        # self.embed_color = int(modal.list_color.values[0])
+        self.embed_color = int(modal.hex_color.value, 16)
         self.embed = self.build_embed()
 
         await interaction.edit_original_message(embed=self.embed)
