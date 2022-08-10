@@ -20,7 +20,8 @@ class Config(commands.Cog, name="Config"):
                                         "star_channel": "",
                                         "callout_channel": "",
                                         "poll_channel": "",
-                                        "wolf_channel": ""}}, config_json)
+                                        "wolf_channel": "",
+                                        "block_text": ""}}, config_json)
 
     # Set the config setting for various BBot actions, such as the channel certain messages are sent to.
     @app_commands.command(name="config_set", description="Set one of BBot's configurations.")
@@ -28,7 +29,7 @@ class Config(commands.Cog, name="Config"):
     @app_commands.describe(value="The channel to set the config for.")
     async def set_config(self, interaction: discord.Interaction,
                          config: typing.Literal["test", "star_channel", "callout_channel", "poll_channel",
-                                                "wolf_channel"],
+                                                "wolf_channel", "block_text"],
                          value: str):
 
         # Start by loading the config json as a dictionary

@@ -1,4 +1,5 @@
 import enum
+import json
 import typing
 import discord
 from discord.ext import commands
@@ -24,6 +25,7 @@ server = JavaServer.lookup("51.81.206.215:25589")  # my minecraft server
 class General(commands.Cog, name="General"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.GUILD = str(bot.guilds[0].id)
 
     # # This currently serves no real purpose. Just learning the channels and utils functionality.
     # @commands.command(name='channels', help='Dev only, does nothing (that you can see).', hidden=True)
@@ -111,11 +113,17 @@ class General(commands.Cog, name="General"):
             await interaction.response.send_message("Server is down :(")
             return
 
+        # Load the server flavortext from the config
+        with open("config.json") as config_json:
+            config = json.load(config_json)
+        flavortext = str(config[self.GUILD]["block_text"])
+
         # Build the embed message using the server query
         embed = discord.Embed(title='Dwayneblock Memorial Minecraft Server',
                               color=0xdd3333,
                               description='{0} Come play with blocks at {1}:{2}\n'
-                              .format(dwayneBlock, server.host, server.port))
+                              .format(dwayneBlock, server.host, server.port) + "\n" +
+                              flavortext)
         embed.add_field(name='Players Online:', value=status.players.online)
         embed.add_field(name='Latency:', value=str(status.latency) + ' ms')
         embed.add_field(name='Game Version:', value=status.version.name)
