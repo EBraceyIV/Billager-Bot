@@ -120,7 +120,7 @@ class General(commands.Cog, name="General"):
 
         # Build the embed message using the server query
         embed = discord.Embed(title='Dwayneblock Memorial Minecraft Server',
-                              color=0xdd3333,
+                              color=int("".join(random.choices(list("0123456789abcdef"), k=6)), 16),
                               description='{0} Come play with blocks at {1}:{2}\n'
                               .format(dwayneBlock, server.host, server.port) + "\n" +
                               flavortext)
