@@ -107,28 +107,31 @@ class General(commands.Cog, name="General"):
     @app_commands.command(name="blocks", description='Minecraft Server Info')
     async def blocks(self, interaction: discord.Interaction):
         try:
-            # Get all of the server information
+            # Get all the server information
             status = server.status()
         except Exception:
             await interaction.response.send_message("Server is down :(")
             return
 
-        # Load the server flavortext from the config
+        # Load the server flavor text from the config
         with open("config.json") as config_json:
             config = json.load(config_json)
-        flavortext = str(config[self.GUILD]["block_text"])
+        flavor_text = str(config[self.GUILD]["block_text"])
 
         # Build the embed message using the server query
         embed = discord.Embed(title='Dwayneblock Memorial Minecraft Server',
                               color=int("".join(random.choices(list("0123456789abcdef"), k=6)), 16),
+                                    # Six hex chars are randomly chosen and then joined together as a string
+                                    # which is then converted to hexadecimal to be read as the embed color
                               description='{0} Come play with blocks at {1}:{2}\n'
                               .format(dwayneBlock, server.host, server.port) + "\n" +
-                              flavortext)
+                              flavor_text)
+
         embed.add_field(name='Players Online:', value=status.players.online)
         embed.add_field(name='Latency:', value=str(status.latency) + ' ms')
         embed.add_field(name='Game Version:', value=status.version.name)
-        # embed.add_field(name="Modpack", value="The 1.12.2 Pack, v. 1.3.4")
         embed.set_footer(text='This server is hosted in the USA by Shockbyte.')
+
         await interaction.response.send_message(embed=embed)
 
     # Let users change Bbot's presence
