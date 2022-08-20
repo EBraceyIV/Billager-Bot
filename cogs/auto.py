@@ -117,16 +117,18 @@ class Auto(commands.Cog, name="Auto"):
         self.werewolf_activity.start()
 
     # Activity for the Wolfager to do to add some life to him
-    @tasks.loop(hours=0, minutes=1, count=8)
+    @tasks.loop(hours=0, minutes=5, count=5)
     async def werewolf_activity(self):
         actions = ["I have the urge to visit London for a big dish of beef chow mein",
                    "c!play werewolves of london",
                    "Hey anyone wanna watch Wolfcop?",
                    "**BARK BARK BARK BARK BARK**",
-                   "I have the urge to drink a piña colada at Trader Vic's"]
+                   "I have the urge to drink a piña colada at Trader Vic's",
+                   "c!play hungry like the wolf",
+                   "I'll rip your lungs out, Jim"]
         # Only run starting on the "second" loop, since the first would trigger immediately
-        if self.werewolf_activity.current_loop != 0:
-            self.werewolf_activity.change_interval(hours=random.randint(0, 1), minutes=random.randint(5, 45))
+        if self.werewolf_activity.current_loop > 0:
+            self.werewolf_activity.change_interval(minutes=random.randint(15, 59))
             await self.bot.get_channel(self.wolf_channel).send(random.choice(actions))
 
     # Billager returns to normal after his Wolfager sabbatical
