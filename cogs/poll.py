@@ -86,7 +86,7 @@ class Buttons(discord.ui.View):
         self.embed = self.build_embed()
         self.color.disabled = False
 
-        await interaction.edit_original_message(embed=self.embed, view=self)
+        await interaction.edit_original_response(embed=self.embed, view=self)
 
     # Button to add choices for the poll
     @discord.ui.button(label="Choices", style=discord.ButtonStyle.green, custom_id="choices")
@@ -102,7 +102,7 @@ class Buttons(discord.ui.View):
 
         self.embed = self.build_embed()
 
-        await interaction.edit_original_message(embed=self.embed)
+        await interaction.edit_original_response(embed=self.embed)
 
     # Button to add a color to the poll embed
     @discord.ui.button(label="Color", style=discord.ButtonStyle.blurple, disabled=True, custom_id="color")
@@ -115,7 +115,7 @@ class Buttons(discord.ui.View):
         self.embed_color = int(modal.hex_color.value, 16)
         self.embed = self.build_embed()
 
-        await interaction.edit_original_message(embed=self.embed)
+        await interaction.edit_original_response(embed=self.embed)
 
     # Button to complete and post the poll for usage
     @discord.ui.button(label="Send It!", style=discord.ButtonStyle.grey, custom_id="send_poll")
@@ -154,7 +154,7 @@ class Poll(commands.Cog, name="Poll"):
                                                 embed=embed,
                                                 view=view,
                                                 ephemeral=True)
-        view.response = await interaction.original_message()
+        view.response = await interaction.original_response()
         await view.wait()
         await asyncio.sleep(1)  # Wait just a second for the on_timeout function to run after the view stops
 

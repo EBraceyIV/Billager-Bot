@@ -213,7 +213,7 @@ class Lore(commands.Cog):
         view = LoreTabs()
         await interaction.response.send_message(view=view)
         # Provide the view with the interaction response for usage
-        view.response = await interaction.original_message()
+        view.response = await interaction.original_response()
         await view.wait()
 
     # Display a list of all lore currently stored
@@ -271,13 +271,13 @@ class Lore(commands.Cog):
 
         # Replace original response to command with the relevant result
         if view.value is None:
-            await interaction.edit_original_message(content="Too late! Next time, be ready to pull the trigger.",
-                                                    view=None)
+            await interaction.edit_original_response(content="Too late! Next time, be ready to pull the trigger.",
+                                                     view=None)
         elif view.value:
             lore_access("remove", lore_title.lower(), None)
-            await interaction.edit_original_message(content="The deed is done.", view=None)
+            await interaction.edit_original_response(content="The deed is done.", view=None)
         else:
-            await interaction.edit_original_message(content="LAME", view=None)
+            await interaction.edit_original_response(content="LAME", view=None)
 
 
 async def setup(bot):

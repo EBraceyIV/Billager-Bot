@@ -103,8 +103,8 @@ async def ctx_minus_msg(interaction: discord.Interaction, message: discord.Messa
     if message.author.mention == interaction.user.mention:
         await interaction.response.send_message("I mean, if you really want to...")
         await asyncio.sleep(2)
-        await interaction.edit_original_message(content="I mean, if you really want to...\n" +
-                                                message.author.display_name + " -1")
+        await interaction.edit_original_response(content="I mean, if you really want to...\n" +
+                                                 message.author.display_name + " -1")
     else:
         await interaction.response.send_message(str(message.author.display_name) + " -1")
 
@@ -124,8 +124,8 @@ async def ctx_minus_usr(interaction: discord.Interaction, member: discord.Member
     if member.mention == interaction.user.mention:
         await interaction.response.send_message("I mean, if you really want to...")
         await asyncio.sleep(2)
-        await interaction.edit_original_message(content="I mean, if you really want to...\n" +
-                                                member.display_name + " -1")
+        await interaction.edit_original_response(content="I mean, if you really want to...\n" +
+                                                 member.display_name + " -1")
     else:
         await interaction.response.send_message(str(member.display_name) + " -1")
 
@@ -174,8 +174,8 @@ class Scores(commands.Cog, name="Scores"):
         if member.mention == interaction.user.mention:
             await interaction.response.send_message("I mean, if you really want to...")
             await asyncio.sleep(2)
-            await interaction.edit_original_message(content="I mean, if you really want to...\n" +
-                                                    member.display_name + " -1")
+            await interaction.edit_original_response(content="I mean, if you really want to...\n" +
+                                                     member.display_name + " -1")
         else:
             await interaction.response.send_message(str(member.display_name) + " -1")
 
