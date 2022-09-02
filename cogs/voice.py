@@ -1,11 +1,20 @@
+import asyncio
 import json
 import typing
+import os
+from pathlib import Path
 import discord
 from discord.ext import commands
 from discord import app_commands
 import random
 
 mp3s = []
+for file in os.listdir(Path.cwd() / "mp3s"):
+    mp3s.append(file[:-4])
+# for file in os.listdir(Path("/mnt/music/Big Daddy Graham CD")):
+#     mp3s.append(file[:-4])
+
+vc = 0
 
 
 class Voice(commands.Cog, name="Voice"):
@@ -15,8 +24,29 @@ class Voice(commands.Cog, name="Voice"):
 
     @app_commands.command(name="join")
     async def join(self, interaction: discord.Interaction):
+        global vc
         author = interaction.user
-        await author.voice.channel.connect()
+        vc = await author.voice.channel.connect()
+
+    @app_commands.command(name="play")
+    async def play(self, interaction: discord.Interaction, sound: str):
+        global vc
+        if sound in mp3s:
+            sound = sound + ".mp3"
+        else:
+            await interaction.response.send_message("Try something else.")
+
+        if vc == 0:
+            try:
+                vc = await interaction.user.author.voice.channel.connect()
+            except:
+                pass
+        source = discord.FFmpegPCMAudio(str(Path.cwd() / 'mp3s' / sound))
+        # source = discord.FFmpegPCMAudio(str("/mnt/music/Big Daddy Graham CD/" + sound))
+        vc.play(source, after=None)
+        while vc.is_playing():
+            await asyncio.sleep(1)
+        vc.stop()
 
     @app_commands.command(name="leave")
     async def leave(self, interaction: discord.Interaction):
