@@ -25,6 +25,7 @@ class Auto(commands.Cog, name="Auto"):
             config = json.load(config_json)
         # Extract just the id int from the channel call string (<#XXXXXX>)
         self.wolf_channel = int(config[self.GUILD]["wolf_channel"][2:-1])
+        self.callout_channel = int(config[self.GUILD]["callout_channel"][2:-1])
 
     async def update_avatar(self, path):
         with open(path, "rb") as img:
@@ -49,14 +50,13 @@ class Auto(commands.Cog, name="Auto"):
     async def callout(self):
         # If today is Friday (noted as 5 by isoweekday(), monday-sunday: 1-7), send the callout post
         if datetime.date.isoweekday(datetime.date.today()) == 5:
-            callout_channel = 720833461329461347 if self.bot.user.name == "BotTest" else 743616007435976754
             # Sort the current user scores from highest to lowest
             plus_minus = shelve.open("plusMinus")
             score_sorted = sorted(plus_minus.items(), key=lambda x: x[1])
             plus_minus.close()
 
             # Send our fun little message letting our friend know they should try making better jokes
-            callout_post = await self.bot.get_channel(callout_channel).send(
+            callout_post = await self.bot.get_channel(self.callout_channel).send(
                 "This is your weekly Bad Score Callout Post, a public "
                 "service brought to you by Billager Bot. This week, " +
                 str(score_sorted[0][0]) + " has the worst score so far. All "
