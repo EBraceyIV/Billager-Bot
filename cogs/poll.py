@@ -137,6 +137,7 @@ class Poll(commands.Cog, name="Poll"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.GUILD = str(bot.guilds[0].id)
+        self.poll_message = None
 
         # Load the channel to output to from the config
         with open("config.json") as config_json:
@@ -161,10 +162,22 @@ class Poll(commands.Cog, name="Poll"):
         # If the view timed out, don't post the poll, probably unfinished
         if not view.timed_out:
             poll = await self.bot.get_channel(self.poll_channel).send(embed=view.embed)
+            self.poll_message = poll
+            self.poll_time.start()
 
             option_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
             for option in range(0, len(poll.embeds[0].fields)):
                 await poll.add_reaction(option_emojis[option])
+
+    @tasks.loop(seconds=10, count=1)
+    async def poll_time(self):
+        print("please wait")
+
+    @poll_time.after_loop
+    async def poll_end(self):
+        for emoji in self.poll_message.reactions:
+            print(emoji.count)
+        await self.poll_message.reply("Poll results are in!")
 
     # @tasks.loop()
     # async def test(self):
