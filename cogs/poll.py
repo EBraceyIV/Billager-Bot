@@ -175,9 +175,15 @@ class Poll(commands.Cog, name="Poll"):
 
     @poll_time.after_loop
     async def poll_end(self):
-        for emoji in self.poll_message.reactions:
-            print(emoji.count)
-        await self.poll_message.reply("Poll results are in!")
+        winner = None
+        last_react_count = 0
+        poll_msg = await self.poll_message.channel.fetch_message(self.poll_message.id)
+        for react in poll_msg.reactions:
+            if not isinstance(type(react), str):
+                print(react.emoji + " " + str(react.count))
+                winner = react if react.count > last_react_count else winner
+                last_react_count = react.count
+        await self.poll_message.reply("Poll results are in! Looks like \"" + winner.emoji + "\" is the winner.")
 
     # @tasks.loop()
     # async def test(self):
