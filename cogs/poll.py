@@ -180,6 +180,8 @@ class Poll(commands.Cog, name="Poll"):
         poll_msg = await self.poll_message.channel.fetch_message(self.poll_message.id)
         for react in poll_msg.reactions:
             if not isinstance(type(react), str):
+                if react.emoji not in ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]:
+                    continue
                 print(react.emoji + " " + str(react.count))
                 winner = react if react.count > last_react_count else winner
                 last_react_count = react.count
