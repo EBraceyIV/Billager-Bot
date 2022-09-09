@@ -160,25 +160,32 @@ class Poll(commands.Cog, name="Poll"):
         await view.wait()
         await asyncio.sleep(1)  # Wait just a second for the on_timeout function to run after the view stops
 
-        # If the view timed out, don't post the poll, probably unfinished
-        if not view.timed_out:
+        if not view.timed_out:  # If the view timed out, don't post the poll, probably unfinished
+            # Post the poll and start the timer loop
             poll = await self.bot.get_channel(self.poll_channel).send(embed=view.embed)
             self.poll_message = poll
             self.poll_time.start()
 
+            # Add a reaction for each option on the poll
             option_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
             for option in range(0, len(poll.embeds[0].fields)):
                 await poll.add_reaction(option_emojis[option])
 
-    @tasks.loop(seconds=10, count=1)
+    # Sets how long a poll is valid for
+    @tasks.loop(hours=12, count=1)
     async def poll_time(self):
-        print("please wait")
+        print("Poll now ongoing.")
 
+    # After the timer loop ends, announce the winner of the poll
     @poll_time.after_loop
     async def poll_end(self):
         winner = None
         last_react_count = 0
+
+        # Get the poll in its final state for reaction processing
         poll_msg = await self.poll_message.channel.fetch_message(self.poll_message.id)
+
+        # Count the number of each reaction that's 1-4 to pick a winner
         for react in poll_msg.reactions:
             if not isinstance(type(react), str):
                 if react.emoji not in ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]:
@@ -187,6 +194,7 @@ class Poll(commands.Cog, name="Poll"):
                 winner = react if react.count > last_react_count else winner
                 last_react_count = react.count
 
+        # Switch to map a number reaction to its int value
         winner_switch = {
             "1️⃣": 1,
             "2️⃣": 2,
@@ -194,6 +202,7 @@ class Poll(commands.Cog, name="Poll"):
             "4️⃣": 4
         }
 
+        # Announce the poll winner in chat, include the name of the winning option
         await self.poll_message.reply("Poll results are in! Looks like " +
                                       winner.emoji + " \"" +
                                       poll_msg.embeds[0].fields[winner_switch.get(winner.emoji) - 1].value +
