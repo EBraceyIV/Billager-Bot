@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import enum
 import typing
 import discord
 from discord.ext import commands, tasks
@@ -185,11 +186,18 @@ class Poll(commands.Cog, name="Poll"):
                 print(react.emoji + " " + str(react.count))
                 winner = react if react.count > last_react_count else winner
                 last_react_count = react.count
-        await self.poll_message.reply("Poll results are in! Looks like \"" + winner.emoji + "\" is the winner.")
 
-    # @tasks.loop()
-    # async def test(self):
-    #     print("E?")
+        winner_switch = {
+            "1️⃣": 1,
+            "2️⃣": 2,
+            "3️⃣": 3,
+            "4️⃣": 4
+        }
+
+        await self.poll_message.reply("Poll results are in! Looks like " +
+                                      winner.emoji + " \"" +
+                                      poll_msg.embeds[0].fields[winner_switch.get(winner.emoji) - 1].value +
+                                      "\" is the winner.")
 
 
 async def setup(bot):
