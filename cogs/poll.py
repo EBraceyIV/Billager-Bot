@@ -149,6 +149,12 @@ class Poll(commands.Cog, name="Poll"):
     @app_commands.command(name="poll",
                           description="Start a poll! Enter how long it should last and the options to pick from.")
     async def poll(self, interaction: discord.Interaction):
+        # Only one poll can run at a time (the way this system is currently written), so don't let multiple start
+        if self.poll_time.is_running():
+            await interaction.response.send_message("Poll is already running! End the current poll or wait for it "
+                                                    "to finish before starting a new one.", ephemeral=True)
+            return
+
         view = Buttons()
         embed = discord.Embed(title="Build-A-Poll",
                               description="STILL UNDER DEVELOPMENT, *SOME* FUNCTION GUARANTEED")
