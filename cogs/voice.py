@@ -11,7 +11,9 @@ import random
 mp3s = []
 for file in os.listdir(Path.cwd() / "mp3s"):
     mp3s.append(file[:-4])
-# for file in os.listdir(Path("/mnt/music/Big Daddy Graham CD")):
+# for file in os.listdir(Path("/mnt/music/Big Daddy Graham CD")):  #this works
+#     mp3s.append(file[:-4])
+# for file in os.listdir(Path("//BillagerCloud/music/Big Daddy Graham CD")):
 #     mp3s.append(file[:-4])
 
 vc = 0
@@ -41,7 +43,15 @@ class Voice(commands.Cog, name="Voice"):
                 vc = await interaction.user.author.voice.channel.connect()
             except:
                 pass
+
         source = discord.FFmpegPCMAudio(str(Path.cwd() / 'mp3s' / sound))
+        # if os.path.exists(Path.cwd() / 'mp3s' / sound):
+        #     source = discord.FFmpegPCMAudio(str(Path.cwd() / 'mp3s' / sound))
+        # elif os.path.exists((Path("//BillagerCloud/music/Big Daddy Graham CD") / sound)):
+        #     source = discord.FFmpegPCMAudio(str(Path("//BillagerCloud/music/Big Daddy Graham CD") / sound))
+        # else:
+        #     return
+
         # source = discord.FFmpegPCMAudio(str("/mnt/music/Big Daddy Graham CD/" + sound))
         vc.play(source, after=None)
         while vc.is_playing():
