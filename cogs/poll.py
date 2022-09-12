@@ -59,10 +59,12 @@ class Buttons(discord.ui.View):
         self.embed = None
         self.embed_color = 0
 
-    def build_embed(self):
+    def build_embed(self, interaction):
         embed = discord.Embed(title=self.title,
                               description=self.desc,
                               color=self.embed_color)
+        embed.set_author(name=interaction.user.display_name + "'s Poll")
+        embed.set_thumbnail(url=interaction.user.avatar.url)
         embed.add_field(name="Option 1️⃣:", value=self.opt1, inline=False)
         embed.add_field(name="Option 2️⃣:", value=self.opt2, inline=False)
         if self.opt3 != "":
@@ -84,7 +86,7 @@ class Buttons(discord.ui.View):
 
         self.title = modal.title_.value
         self.desc = modal.description.value
-        self.embed = self.build_embed()
+        self.embed = self.build_embed(interaction)
         self.color.disabled = False
 
         await interaction.edit_original_response(embed=self.embed, view=self)
@@ -178,7 +180,7 @@ class Poll(commands.Cog, name="Poll"):
                 await poll.add_reaction(option_emojis[option])
 
     # Sets how long a poll is valid for
-    @tasks.loop(hours=12, count=1)
+    @tasks.loop(seconds=20, count=1)
     async def poll_time(self):
         print("Poll now ongoing.")
 
