@@ -174,6 +174,9 @@ class Poll(commands.Cog, name="Poll"):
             self.poll_message = poll
             self.poll_time.start()
 
+            # Pin the poll for easy access
+            await poll.pin(reason="Poll from " + interaction.user.name)
+
             # Add a reaction for each option on the poll
             option_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
             for option in range(0, len(poll.embeds[0].fields)):
@@ -189,6 +192,9 @@ class Poll(commands.Cog, name="Poll"):
     async def poll_end(self):
         winner = None
         last_react_count = 0
+
+        # Unpin the poll now that it's done
+        await self.poll_message.unpin(reason="Poll ended.")
 
         # Get the poll in its final state for reaction processing
         poll_msg = await self.poll_message.channel.fetch_message(self.poll_message.id)
