@@ -151,7 +151,8 @@ class Poll(commands.Cog, name="Poll"):
         self.poll_channel = int(config[self.GUILD]["poll_channel"][2:-1])
 
     @app_commands.command(name="poll",
-                          description="Start a poll! Enter how long it should last and the options to pick from.")
+                          description="Use the buttons to build your poll. "
+                                      "Active for up to 12 hours. One poll active at a time.")
     async def poll(self, interaction: discord.Interaction):
         # Only one poll can run at a time (the way this system is currently written), so don't let multiple start
         if self.poll_time.is_running():
@@ -162,7 +163,8 @@ class Poll(commands.Cog, name="Poll"):
         self.poll_author = interaction.user
         view = Buttons()
         embed = discord.Embed(title="Build-A-Poll",
-                              description="STILL UNDER DEVELOPMENT, *SOME* FUNCTION GUARANTEED")
+                              description="Use the buttons below to build your poll.\n"
+                                          "\"Color\" takes an RBG hex code like 'BAD455', '1337AF', or 'DADB0D'.")
         await interaction.response.send_message("What your poll will look like:",
                                                 embed=embed,
                                                 view=view,
