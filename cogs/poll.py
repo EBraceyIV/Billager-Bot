@@ -65,6 +65,7 @@ class Buttons(discord.ui.View):
                               color=self.embed_color)
         embed.set_author(name=interaction.user.display_name + "'s Poll")
         embed.set_thumbnail(url=interaction.user.avatar.url)
+        embed.set_footer(text="Poll author can react with ❌ to end the poll manually.")
         embed.add_field(name="Option 1️⃣:", value=self.opt1, inline=False)
         embed.add_field(name="Option 2️⃣:", value=self.opt2, inline=False)
         if self.opt3 != "":
@@ -141,6 +142,7 @@ class Poll(commands.Cog, name="Poll"):
         self.bot = bot
         self.GUILD = str(bot.guilds[0].id)
         self.poll_message = None
+        self.poll_author = None
 
         # Load the channel to output to from the config
         with open("config.json") as config_json:
@@ -157,6 +159,7 @@ class Poll(commands.Cog, name="Poll"):
                                                     "to finish before starting a new one.", ephemeral=True)
             return
 
+        self.poll_author = interaction.user
         view = Buttons()
         embed = discord.Embed(title="Build-A-Poll",
                               description="STILL UNDER DEVELOPMENT, *SOME* FUNCTION GUARANTEED")
@@ -221,6 +224,21 @@ class Poll(commands.Cog, name="Poll"):
                                       winner.emoji + " \"" +
                                       poll_msg.embeds[0].fields[winner_switch.get(winner.emoji) - 1].value +
                                       "\" is the winner.")
+
+    # Reaction listener for manually ending the poll
+    @commands.Cog.listener("on_reaction_add")
+    async def react_end_poll(self, reaction, user):
+        # Ignore the auto-reacts from the bot
+        if user == self.bot.user:
+            return
+
+        # Get the poll message for verification
+        poll_msg = await self.poll_message.channel.fetch_message(self.poll_message.id)
+
+        # Cancel poll if the correct emoji is used by the poll author on the poll message itself
+        if reaction.emoji == "❌" and reaction.message == poll_msg and user == self.poll_author:
+            # Cancelling the poll triggers the after_loop block
+            self.poll_time.cancel()
 
 
 async def setup(bot):
