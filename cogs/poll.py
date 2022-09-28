@@ -12,7 +12,7 @@ import json
 class PollEmbed(discord.ui.Modal, title="Build-A-Poll: Embed Title & Description"):
     # TextInputs to accept the lore title and description, both required
     title_ = discord.ui.TextInput(label="Title:", style=discord.TextStyle.short, required=True)
-    description = discord.ui.TextInput(label="Description:", style=discord.TextStyle.long, required=True)
+    description = discord.ui.TextInput(label="Description:", style=discord.TextStyle.long, required=False)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
