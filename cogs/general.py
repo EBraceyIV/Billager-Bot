@@ -62,10 +62,10 @@ class General(commands.Cog, name="General"):
                        "oh, i see",
                        "you know what? i'll take it",
                        "and **LIE**",
-                       "c!play surf rock anthology volume 1",
-                       "c!play sounds of the supermarket",
-                       "c!play a girl worth fighting for",
-                       "c!play yankee doodle swag remix",
+                       "!play surf rock anthology volume 1",
+                       "!play sounds of the supermarket",
+                       "!play a girl worth fighting for",
+                       "!play yankee doodle swag remix",
                        monkaGun,
                        "GET IN THE CAR HORATIO",
                        "I can't believe this",
@@ -88,12 +88,12 @@ class General(commands.Cog, name="General"):
                        "Dunston checks in",
                        "I cannot believe you",
                        "I will remember this",
-                       "I don't remember the touch of a woman " + fortCry,
                        "you're gonna lose your JOB",
                        "doodoo ass",
                        "no ball shaming allowed",
                        "show me balls, Steve!",
-                       "No, I'm Will"]
+                       "No, I'm Will",
+                       "yeah I financed a pizza so what"]
         response = random.choice(willReplies)
         await interaction.response.send_message(response)
 
