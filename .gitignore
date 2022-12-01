@@ -15,4 +15,5 @@
 /config.json
 /cogs/test.py
 /lore_backup.txt
-/cogs/yt.py
+/defunct/yt.py
+/defunct/
