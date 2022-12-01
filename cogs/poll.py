@@ -196,6 +196,7 @@ class Poll(commands.Cog, name="Poll"):
     @poll_time.after_loop
     async def poll_end(self):
         winner = None
+        react_counts = []
         last_react_count = 0
 
         # Unpin the poll now that it's done
@@ -210,8 +211,8 @@ class Poll(commands.Cog, name="Poll"):
                 if react.emoji not in ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]:
                     continue
                 print(react.emoji + " " + str(react.count))
+                react_counts.append(react.count)
                 winner = react if react.count > last_react_count else winner
-                last_react_count = react.count
 
         # Switch to map a number reaction to its int value
         winner_switch = {
@@ -221,11 +222,18 @@ class Poll(commands.Cog, name="Poll"):
             "4️⃣": 4
         }
 
-        # Announce the poll winner in chat, include the name of the winning option
-        await self.poll_message.reply("Poll results are in! Looks like " +
-                                      winner.emoji + " \"" +
-                                      poll_msg.embeds[0].fields[winner_switch.get(winner.emoji) - 1].value +
-                                      "\" is the winner.")
+        # Use the logic of a set to determine a tie:
+        # Sets cannot hold multiple of the same element so if the set has a different length (less elements) then
+        # a tie must have happened.
+        if len(set(react_counts)) == len(poll_msg.reactions):
+            # Announce the poll winner in chat, include the name of the winning option
+            await self.poll_message.reply("Poll results are in! Looks like " +
+                                          winner.emoji + " \"" +
+                                          poll_msg.embeds[0].fields[winner_switch.get(winner.emoji) - 1].value +
+                                          "\" is the winner.")
+        else:
+            await self.poll_message.reply("Poll results are in! Looks like a tie so go check the results yourselves "
+                                          "because I am not reading all of that.")
 
     # Reaction listener for manually ending the poll
     @commands.Cog.listener("on_reaction_add")
