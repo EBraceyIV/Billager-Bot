@@ -82,6 +82,8 @@ class Controls(discord.ui.View):
         self.embed = None
         self.DealerState = None
         self.PlayerState = None
+        self.condition = ""
+        self.cards_output = ""
         # self.D_hand = [None]
         # self.D_value = 0
         # self.D_cards = []
@@ -92,21 +94,26 @@ class Controls(discord.ui.View):
     # Hit to take another card
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple)
     async def hit(self, interaction: discord.Interaction, button: discord.Button):
-        # This is all kinds of messed up at the moment
-        # self.P_hand.append(random.choice(list(Cards)))
-        # print(self.P_hand)
-        # for card in self.P_hand:
-        #     self.P_value += card.value[0]
-        # self.P_cards.append(card.value[2][random.randint(0, 3)])
-        # print(str(self.PlayerState.hand) + " " + str(self.PlayerState.value))
         self.PlayerState.deal()
-        # print(str(self.PlayerState.hand) + " " + str(self.PlayerState.value))
+
+        if sum(self.PlayerState.value) > 21:
+            self.condition = "**BUST!**"
+        elif sum(self.PlayerState.value) == 21:
+            self.condition = "**BLACKJACK!**"
+
+        for card in self.PlayerState.hand:
+            self.cards_output += card
 
         self.embed.set_field_at(index=1,
                                 name="Your Hand",
-                                value=str(self.PlayerState.hand[0]) + " " + str(sum(self.PlayerState.value)))
-
+                                value=self.cards_output + " " + str(sum(self.PlayerState.value)) + " " + self.condition)
         await interaction.response.edit_message(embed=self.embed)
+        self.cards_output = None
+
+        if self.condition != "":
+            self.PlayerState = None
+            self.DealerState = None
+            self.stop()
 
     # Stand to end game
     @discord.ui.button(label="Stand", style=discord.ButtonStyle.blurple)
