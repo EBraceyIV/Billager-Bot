@@ -6,6 +6,8 @@ from discord.ext import commands
 from discord import app_commands
 import random
 
+CARDBACK = "🂠"
+
 
 class Cards(Enum):
     Ace = [1, "ACE", ["🂡", "🂱", "🃁", "🃑"]]  # Suit order is spade, heart, diamond, club
@@ -78,6 +80,22 @@ class Blackjack(commands.Cog, name="Blackjack"):
     @app_commands.command(name="blackjack", description="Play a game of blackjack with Billager.")
     async def blackjack(self, interaction: discord.Interaction):
         view = Controls()
+        embed = self.emb_template
+        #random.choice(list(Cards)).value[2][random.randint(0, 3)]
+
+        D_hand = [random.choice(list(Cards)),
+                  random.choice(list(Cards))]
+        D_value = D_hand[0].value[0] + D_hand[1].value[0]
+
+        P_hand = [random.choice(list(Cards)),
+                  random.choice(list(Cards))]
+        P_value = P_hand[0].value[0] + P_hand[1].value[0]
+
+        embed.add_field(name="Dealer's Hand",
+                        value=D_hand[0].value[2][random.randint(0, 3)] + " " + CARDBACK + "\n" + "???")
+        embed.add_field(name="Your Hand",
+                        value=P_hand[0].value[2][random.randint(0, 3)] + " " + P_hand[1].value[2][random.randint(0, 3)] + "\n" + str(P_value))
+
         await interaction.response.send_message(embed=self.emb_template, view=view)
         await view.wait()
 
