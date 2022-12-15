@@ -55,30 +55,57 @@ class Cards(Enum):
 
 
 # Play a game of blackjack with Bbot
+
+
+# def deal():
+#     card_data = random.choice(list(Cards))
+#     card_icon = card_data.value[2][random.randint(0, 3)]
+#     card_value = card_data.value[0]
+#     return card_icon, card_value
+
+
+class State:
+    def __init__(self):
+        self.hand = []
+        self.value = []
+
+    def deal(self):
+        card_data = random.choice(list(Cards))
+        self.hand.append(card_data.value[2][random.randint(0, 3)])
+        self.value.append(card_data.value[0])
+
+
 class Controls(discord.ui.View):
     def __init__(self):
         super().__init__()
         self.response = None
         self.embed = None
-        self.D_hand = [None]
-        self.D_value = 0
-        self.D_cards = []
-        self.P_hand = [None]
-        self.P_value = 0
-        self.P_cards = []
+        self.DealerState = None
+        self.PlayerState = None
+        # self.D_hand = [None]
+        # self.D_value = 0
+        # self.D_cards = []
+        # self.P_hand = [None]
+        # self.P_value = 0
+        # self.P_cards = []
 
     # Hit to take another card
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple)
     async def hit(self, interaction: discord.Interaction, button: discord.Button):
         # This is all kinds of messed up at the moment
-        self.P_hand.append(random.choice(list(Cards)))
+        # self.P_hand.append(random.choice(list(Cards)))
         # print(self.P_hand)
-        for card in self.P_hand:
-            self.P_value += card.value[0]
-            self.P_cards.append(card.value[2][random.randint(0, 3)])
+        # for card in self.P_hand:
+        #     self.P_value += card.value[0]
+        # self.P_cards.append(card.value[2][random.randint(0, 3)])
+        # print(str(self.PlayerState.hand) + " " + str(self.PlayerState.value))
+        self.PlayerState.deal()
+        # print(str(self.PlayerState.hand) + " " + str(self.PlayerState.value))
+
         self.embed.set_field_at(index=1,
                                 name="Your Hand",
-                                value=str(self.P_cards) + " " + str(self.P_value))
+                                value=str(self.PlayerState.hand[0]) + " " + str(sum(self.PlayerState.value)))
+
         await interaction.response.edit_message(embed=self.embed)
 
     # Stand to end game
@@ -103,27 +130,37 @@ class Blackjack(commands.Cog, name="Blackjack"):
         embed = self.emb_template
         #random.choice(list(Cards)).value[2][random.randint(0, 3)]
 
-        # Dealer data
-        D_hand = [random.choice(list(Cards)),
-                  random.choice(list(Cards))]
-        D_value = D_hand[0].value[0] + D_hand[1].value[0]
-        view.D_hand = D_hand
-        #view.D_value = D_value
-
-        # Player data
-        P_hand = [random.choice(list(Cards)),
-                  random.choice(list(Cards))]
-        P_value = P_hand[0].value[0] + P_hand[1].value[0]
-        view.P_hand = P_hand
-        #view.P_value = P_value
+        # # Dealer data
+        DealerState = State()
+        DealerState.deal()
+        DealerState.deal()
+        print(str(DealerState.hand) + " " + str(DealerState.value))
+        # D_hand = [random.choice(list(Cards)),
+        #           random.choice(list(Cards))]
+        # D_value = D_hand[0].value[0] + D_hand[1].value[0]
+        # view.D_hand = D_hand
+        # #view.D_value = D_value
+        #
+        # # Player data
+        PlayerState = State()
+        PlayerState.deal()
+        PlayerState.deal()
+        print(str(PlayerState.hand) + " " + str(PlayerState.value))
+        # P_hand = [random.choice(list(Cards)),
+        #           random.choice(list(Cards))]
+        # P_value = P_hand[0].value[0] + P_hand[1].value[0]
+        # view.P_hand = P_hand
+        # #view.P_value = P_value
 
         embed.insert_field_at(index=0,
                               name="Dealer's Hand",
-                              value=D_hand[0].value[2][random.randint(0, 3)] + " " + CARDBACK + "\n" + "???")
+                              value=DealerState.hand[0] + " " + CARDBACK + "\n" + "???")
         embed.insert_field_at(index=1,
                               name="Your Hand",
-                              value=P_hand[0].value[2][random.randint(0, 3)] + " " + P_hand[1].value[2][random.randint(0, 3)] + "\n" + str(P_value))
+                              value=PlayerState.hand[0] + PlayerState.hand[1] + "\n" + str(sum(PlayerState.value)))
         view.embed = embed
+        view.DealerState = DealerState
+        view.PlayerState = PlayerState
 
         await interaction.response.send_message(embed=self.emb_template, view=view)
         # view.response = await interaction.original_response()
