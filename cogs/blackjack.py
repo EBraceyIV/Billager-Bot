@@ -84,32 +84,34 @@ class Controls(discord.ui.View):
         self.PlayerState = None
         self.condition = ""
         self.cards_output = ""
-        # self.D_hand = [None]
-        # self.D_value = 0
-        # self.D_cards = []
-        # self.P_hand = [None]
-        # self.P_value = 0
-        # self.P_cards = []
 
     # Hit to take another card
+    # TODO: Ace 1/11 handling
+    #       Make game-end condition disable buttons
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple)
     async def hit(self, interaction: discord.Interaction, button: discord.Button):
+        # Deal new card to player
         self.PlayerState.deal()
 
+        # Check for game-end condition
         if sum(self.PlayerState.value) > 21:
             self.condition = "**BUST!**"
         elif sum(self.PlayerState.value) == 21:
             self.condition = "**BLACKJACK!**"
 
+        # Add new card to hand display
         for card in self.PlayerState.hand:
             self.cards_output += card
 
+        # Update embed with new hand and value + game-end condition (conditional)
         self.embed.set_field_at(index=1,
                                 name="Your Hand",
                                 value=self.cards_output + " " + str(sum(self.PlayerState.value)) + " " + self.condition)
         await interaction.response.edit_message(embed=self.embed)
+        # Reset hand to display
         self.cards_output = None
 
+        # If game has ended, clean up variables and stop the view from taking new input
         if self.condition != "":
             self.PlayerState = None
             self.DealerState = None
@@ -130,41 +132,34 @@ class Blackjack(commands.Cog, name="Blackjack"):
                                           description="Hit, Stand, Win, Lose, it's all the same to me.",
                                           color=0x7289da)
 
+    # TODO: Handling for getting blackjack on first deal
     @app_commands.command(name="blackjack", description="Play a game of blackjack with Billager.")
     async def blackjack(self, interaction: discord.Interaction):
         view = Controls()
 
         embed = self.emb_template
-        #random.choice(list(Cards)).value[2][random.randint(0, 3)]
 
+        # Deal first two cards to dealer and player
         # # Dealer data
         DealerState = State()
         DealerState.deal()
         DealerState.deal()
-        print(str(DealerState.hand) + " " + str(DealerState.value))
-        # D_hand = [random.choice(list(Cards)),
-        #           random.choice(list(Cards))]
-        # D_value = D_hand[0].value[0] + D_hand[1].value[0]
-        # view.D_hand = D_hand
-        # #view.D_value = D_value
-        #
+
         # # Player data
         PlayerState = State()
         PlayerState.deal()
         PlayerState.deal()
-        print(str(PlayerState.hand) + " " + str(PlayerState.value))
-        # P_hand = [random.choice(list(Cards)),
-        #           random.choice(list(Cards))]
-        # P_value = P_hand[0].value[0] + P_hand[1].value[0]
-        # view.P_hand = P_hand
-        # #view.P_value = P_value
 
+        # Dealer's second card obscured to start
         embed.insert_field_at(index=0,
                               name="Dealer's Hand",
                               value=DealerState.hand[0] + " " + CARDBACK + "\n" + "???")
+
+        # Display player's dealt hand and current value
         embed.insert_field_at(index=1,
                               name="Your Hand",
                               value=PlayerState.hand[0] + PlayerState.hand[1] + "\n" + str(sum(PlayerState.value)))
+        # Pass states to view for button handling
         view.embed = embed
         view.DealerState = DealerState
         view.PlayerState = PlayerState
