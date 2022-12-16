@@ -1,3 +1,4 @@
+import asyncio
 from enum import Enum
 import json
 import typing
@@ -78,6 +79,7 @@ class State:
 class Controls(discord.ui.View):
     def __init__(self):
         super().__init__()
+        self.timeout = 30
         self.response = None
         self.embed = None
         self.DealerState = None
@@ -120,8 +122,37 @@ class Controls(discord.ui.View):
     # Stand to end game
     @discord.ui.button(label="Stand", style=discord.ButtonStyle.blurple)
     async def stand(self, interaction: discord.Interaction, button: discord.Button):
-        print("Stand!")
-        self.stop()
+        # Add new card to hand display
+        for card in self.DealerState.hand:
+            self.cards_output += card
+
+        self.embed.set_field_at(index=0,
+                                name="Dealer's Hand",
+                                value=self.cards_output + " " + str(sum(self.DealerState.value)) + " " + self.condition)
+        await interaction.response.edit_message(embed=self.embed)
+        # Reset hand to display
+        self.cards_output = None
+
+        await asyncio.sleep(2)
+
+        # if sum(self.DealerState.value) < sum(self.PlayerState.value):
+        #     self.DealerState.deal()
+        #
+        #     # Add new card to hand display
+        #     for card in self.DealerState.hand:
+        #         self.cards_output += card
+        #
+        #     self.embed.set_field_at(index=0,
+        #                             name="Dealer's Hand",
+        #                             value=self.cards_output + " " + str(
+        #                                 sum(self.DealerState.value)) + " " + self.condition)
+        #     await interaction.response.edit_message(embed=self.embed)
+        #
+        #     await asyncio.sleep(2)
+
+        for child in self.children:
+            child.disabled = True
+        await self.response.edit(view=self)
 
 
 class Blackjack(commands.Cog, name="Blackjack"):
@@ -153,19 +184,19 @@ class Blackjack(commands.Cog, name="Blackjack"):
         # Dealer's second card obscured to start
         embed.insert_field_at(index=0,
                               name="Dealer's Hand",
-                              value=DealerState.hand[0] + " " + CARDBACK + "\n" + "???")
+                              value=DealerState.hand[0] + " " + CARDBACK + " " + "???")
 
         # Display player's dealt hand and current value
         embed.insert_field_at(index=1,
                               name="Your Hand",
-                              value=PlayerState.hand[0] + PlayerState.hand[1] + "\n" + str(sum(PlayerState.value)))
+                              value=PlayerState.hand[0] + PlayerState.hand[1] + " " + str(sum(PlayerState.value)))
         # Pass states to view for button handling
         view.embed = embed
         view.DealerState = DealerState
         view.PlayerState = PlayerState
 
         await interaction.response.send_message(embed=self.emb_template, view=view)
-        # view.response = await interaction.original_response()
+        view.response = await interaction.original_response()
 
         await view.wait()
 
