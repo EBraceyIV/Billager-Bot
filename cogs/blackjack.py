@@ -14,15 +14,15 @@ class Cards(Enum):
     Ace = [1, "ACE", ["🂡", "🂱", "🃁", "🃑"]]  # Suit order is spade, heart, diamond, club
     Two = [2, "TWO", ["🂢", "🂲", "🃂", "🃒"]]
     Three = [3, "THREE", ["🂣", "🂳", "🃃", "🃓"]]
-    Four = [4, "FOUR", ["🂤",  "🂴", "🃄",	"🃔"]]
+    Four = [4, "FOUR", ["🂤", "🂴", "🃄", "🃔"]]
     Five = [5, "FIVE", ["🂥", "🂵", "🃅", "🃕"]]
     Six = [6, "SIX", ["🂦", "🂶", "🃆", "🃖"]]
-    Seven = [7, "SEVEN", ["🂧",	"🂷", "🃇", "🃗"]]
-    Eight = [8, "EIGHT", ["🂨",	"🂸", "🃈", "🃘"]]
+    Seven = [7, "SEVEN", ["🂧", "🂷", "🃇", "🃗"]]
+    Eight = [8, "EIGHT", ["🂨", "🂸", "🃈", "🃘"]]
     Nine = [9, "NINE", ["🂩", "🂹", "🃉", "🃙"]]
-    Ten = [10, "TEN", ["🂪",	"🂺", "🃊", "🃚"]]
+    Ten = [10, "TEN", ["🂪", "🂺", "🃊", "🃚"]]
     Jack = [10, "JACK", ["🂫", "🂻", "🃋", "🃛"]]
-    Queen = [10, "QUEEN", ["🂭",	"🂽", "🃍", "🃝"]]
+    Queen = [10, "QUEEN", ["🂭", "🂽", "🃍", "🃝"]]
     King = [10, "KING", ["🂮", "🂾", "🃎", "🃞"]]
 
 
@@ -133,7 +133,7 @@ class Controls(discord.ui.View):
         # Reset hand to display
         self.cards_output = None
 
-        await asyncio.sleep(2)
+        await asyncio.sleep(0.5)
 
         # if sum(self.DealerState.value) < sum(self.PlayerState.value):
         #     self.DealerState.deal()
@@ -148,11 +148,12 @@ class Controls(discord.ui.View):
         #                                 sum(self.DealerState.value)) + " " + self.condition)
         #     await interaction.response.edit_message(embed=self.embed)
         #
-        #     await asyncio.sleep(2)
+        #     await asyncio.sleep(0.5)
 
         for child in self.children:
             child.disabled = True
         await self.response.edit(view=self)
+        self.stop()
 
 
 class Blackjack(commands.Cog, name="Blackjack"):
@@ -169,6 +170,9 @@ class Blackjack(commands.Cog, name="Blackjack"):
         view = Controls()
 
         embed = self.emb_template
+        # Clearing the fields prevents multiple new fields being added to the initially summoned embed by
+        # running the command again
+        embed.clear_fields()
 
         # Deal first two cards to dealer and player
         # # Dealer data
@@ -190,6 +194,7 @@ class Blackjack(commands.Cog, name="Blackjack"):
         embed.insert_field_at(index=1,
                               name="Your Hand",
                               value=PlayerState.hand[0] + PlayerState.hand[1] + " " + str(sum(PlayerState.value)))
+
         # Pass states to view for button handling
         view.embed = embed
         view.DealerState = DealerState
