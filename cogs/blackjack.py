@@ -85,6 +85,7 @@ class Controls(discord.ui.View):
         self.embed = None
         self.DealerState = None
         self.PlayerState = None
+        self.winner = None
         self.condition = ""
         self.cards_output = ""
 
@@ -94,6 +95,21 @@ class Controls(discord.ui.View):
             self.condition = "**BUST!**"
         elif sum(_State_value) == 21:
             self.condition = "**BLACKJACK!**"
+
+    def checkWinner(self):
+        if sum(self.PlayerState.value) < sum(self.DealerState.value):
+            self.winner = "DEALER"
+        elif sum(self.PlayerState.value) == sum(self.DealerState.value):
+            pass
+        elif sum(self.PlayerState.value) > sum(self.DealerState.value):
+            self.winner = "PLAYER"
+
+    def endGame(self):
+        self.PlayerState = None
+        self.DealerState = None
+        for child in self.children:
+            child.disabled = True
+        self.stop()
 
     # Hit to take another card
     # TODO: Ace 1/11 handling
@@ -168,14 +184,50 @@ class Controls(discord.ui.View):
 
             self.cards_output = ""
             await asyncio.sleep(0.5)
+        elif sum(self.DealerState.value) == sum(self.PlayerState.value):
+            self.embed.insert_field_at(index=2,
+                                       name="**PUSH**",
+                                       value="Good news, you didn't lose. Bad news, you didn't win.")
+            await interaction.edit_original_response(embed=self.embed)
+            self.endGame()
+            await self.response.edit(view=self)
+            return
+        elif sum(self.DealerState.value) > sum(self.PlayerState.value):
+            self.embed.insert_field_at(index=2,
+                                       name="**YOU LOSE.**",
+                                       value="Go back to playing Yu-Gi-Oh.")
+            await interaction.edit_original_response(embed=self.embed)
+            self.endGame()
+            await self.response.edit(view=self)
+            return
 
-        # Standing ends game, so clear states and disable buttons after
-        self.PlayerState = None
-        self.DealerState = None
-        for child in self.children:
-            child.disabled = True
+        if self.condition == "**BUST!**":
+            self.embed.insert_field_at(index=2,
+                                       name="**YOU WIN!**",
+                                       value="Counting cards pays off.")
+            await interaction.edit_original_response(embed=self.embed)
+            self.endGame()
+            await self.response.edit(view=self)
+            return
+
+        if sum(self.DealerState.value) < sum(self.PlayerState.value):
+            self.embed.insert_field_at(index=2,
+                                       name="**YOU WIN!**",
+                                       value="Counting cards pays off.")
+            await interaction.edit_original_response(embed=self.embed)
+        elif sum(self.DealerState.value) == sum(self.PlayerState.value):
+            self.embed.insert_field_at(index=2,
+                                       name="**PUSH**",
+                                       value="Good news, you didn't lose. Bad news, you didn't win.")
+            await interaction.edit_original_response(embed=self.embed)
+        elif sum(self.DealerState.value) > sum(self.PlayerState.value):
+            self.embed.insert_field_at(index=2,
+                                       name="**YOU LOSE.**",
+                                       value="Go back to playing Yu-Gi-Oh.")
+            await interaction.edit_original_response(embed=self.embed)
+
+        self.endGame()
         await self.response.edit(view=self)
-        self.stop()
 
 
 class Blackjack(commands.Cog, name="Blackjack"):
