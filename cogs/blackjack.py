@@ -111,7 +111,7 @@ class Controls(discord.ui.View):
                                 value=self.cards_output + " " + str(sum(self.PlayerState.value)) + " " + self.condition)
         await interaction.response.edit_message(embed=self.embed)
         # Reset hand to display
-        self.cards_output = None
+        self.cards_output = ""
 
         # If game has ended, clean up variables and stop the view from taking new input
         if self.condition != "":
