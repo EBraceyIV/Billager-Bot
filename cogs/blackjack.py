@@ -79,6 +79,7 @@ class State:
 class Controls(discord.ui.View):
     def __init__(self):
         super().__init__()
+        self.firstHandBool = False
         self.timeout = 30
         self.response = None
         self.embed = None
@@ -96,7 +97,7 @@ class Controls(discord.ui.View):
 
     # Hit to take another card
     # TODO: Ace 1/11 handling
-    @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple, custom_id="hit")
     async def hit(self, interaction: discord.Interaction, button: discord.Button):
         # Deal new card to player
         self.PlayerState.deal()
@@ -126,7 +127,7 @@ class Controls(discord.ui.View):
             self.stop()
 
     # Stand to end game
-    @discord.ui.button(label="Stand", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label="Stand", style=discord.ButtonStyle.blurple, custom_id="stand")
     async def stand(self, interaction: discord.Interaction, button: discord.Button):
         # Add cards to hand display
         for card in self.DealerState.hand:
@@ -206,24 +207,30 @@ class Blackjack(commands.Cog, name="Blackjack"):
         PlayerState.deal()
         PlayerState.deal()
 
+        # Check for chance that player was dealt a blackjack, disable buttons prior to display if true
+        view.checkGameCondition(PlayerState.value)
+        # Game condition is used instead of just equating the value to 21 so that it can be used in the embed below
+        if view.condition != "":
+            view.hit.disabled = True
+            view.stand.disabled = True
+
         # Dealer's second card obscured to start
         embed.insert_field_at(index=0,
                               name="Dealer's Hand",
                               value=DealerState.hand[0] + " " + CARDBACK + " " + "???")
 
-        # Display player's dealt hand and current value
+        # Display player's dealt hand and current value (plus condition if dealt a blackjack)
         embed.insert_field_at(index=1,
                               name="Your Hand",
-                              value=PlayerState.hand[0] + PlayerState.hand[1] + " " + str(sum(PlayerState.value)))
+                              value=PlayerState.hand[0] + PlayerState.hand[1] + " " + str(sum(PlayerState.value)) +
+                              " " + view.condition)
 
         # Pass states to view for button handling
         view.embed = embed
         view.DealerState = DealerState
         view.PlayerState = PlayerState
-
         await interaction.response.send_message(embed=self.emb_template, view=view)
         view.response = await interaction.original_response()
-
         await view.wait()
 
 
