@@ -11,7 +11,7 @@ CARDBACK = "🂠"
 
 
 class Cards(Enum):
-    Ace = [1, "ACE", ["🂡", "🂱", "🃁", "🃑"]]  # Suit order is spade, heart, diamond, club
+    Ace = [11, "ACE", ["🂡", "🂱", "🃁", "🃑"]]  # Suit order is spade, heart, diamond, club
     Two = [2, "TWO", ["🂢", "🂲", "🃂", "🃒"]]
     Three = [3, "THREE", ["🂣", "🂳", "🃃", "🃓"]]
     Four = [4, "FOUR", ["🂤", "🂴", "🃄", "🃔"]]
