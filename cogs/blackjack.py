@@ -103,7 +103,6 @@ class Controls(discord.ui.View):
         self.stop()
 
     # Hit to take another card
-    # TODO: Ace 1/11 handling
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple, custom_id="hit")
     async def hit(self, interaction: discord.Interaction, button: discord.Button):
         # Deal new card to player
@@ -221,6 +220,7 @@ class Controls(discord.ui.View):
         await self.response.edit(view=self)
 
 
+# TODO: Ace 1/11 handling
 class Blackjack(commands.Cog, name="Blackjack"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -229,7 +229,6 @@ class Blackjack(commands.Cog, name="Blackjack"):
                                           description="Hit, Stand, Win, Lose, it's all the same to me.",
                                           color=0x7289da)
 
-    # TODO: Handling for getting blackjack on first deal
     @app_commands.command(name="blackjack", description="Play a game of blackjack with Billager.")
     async def blackjack(self, interaction: discord.Interaction):
         view = Controls()
@@ -256,7 +255,7 @@ class Blackjack(commands.Cog, name="Blackjack"):
         if view.condition != "":
             view.hit.disabled = True
             view.stand.disabled = True
-            # Dealer's second card obscured to start
+            # Since the player can't be dealt a bust, change in condition here must be a blackjack
             embed.insert_field_at(index=2,
                                   name="YOU WIN!",
                                   value="Counting cards pays off.")
