@@ -134,24 +134,30 @@ class Controls(discord.ui.View):
                                 value=self.cards_output + " " + str(sum(self.DealerState.value)) + " " + self.condition)
         await interaction.response.edit_message(embed=self.embed)
         # Reset hand to display
-        self.cards_output = None
+        self.cards_output = ""
 
         await asyncio.sleep(0.5)
 
-        # if sum(self.DealerState.value) < sum(self.PlayerState.value):
-        #     self.DealerState.deal()
-        #
-        #     # Add new card to hand display
-        #     for card in self.DealerState.hand:
-        #         self.cards_output += card
-        #
-        #     self.embed.set_field_at(index=0,
-        #                             name="Dealer's Hand",
-        #                             value=self.cards_output + " " + str(
-        #                                 sum(self.DealerState.value)) + " " + self.condition)
-        #     await interaction.response.edit_message(embed=self.embed)
-        #
-        #     await asyncio.sleep(0.5)
+        if sum(self.DealerState.value) < sum(self.PlayerState.value):
+            print("give dealer another card")
+            self.DealerState.deal()
+
+            # Add new card to hand display
+            for card in self.DealerState.hand:
+                self.cards_output += card
+            print(self.cards_output)
+            try:
+                self.embed.set_field_at(index=0,
+                                        name="Dealer's Hand",
+                                        value=self.cards_output + " " + str(sum(self.DealerState.value)) + " " +
+                                        self.condition)
+                await interaction.edit_original_response(embed=self.embed)
+            except Exception as e:
+                print(e)
+
+            self.cards_output = ""
+
+            await asyncio.sleep(0.5)
 
         for child in self.children:
             child.disabled = True
