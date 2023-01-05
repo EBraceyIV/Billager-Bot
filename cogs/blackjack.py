@@ -87,19 +87,22 @@ class Controls(discord.ui.View):
         self.condition = ""
         self.cards_output = ""
 
+    def checkGameCondition(self, _State_value):
+        # Check for game-end condition
+        if sum(_State_value) > 21:
+            self.condition = "**BUST!**"
+        elif sum(_State_value) == 21:
+            self.condition = "**BLACKJACK!**"
+
     # Hit to take another card
     # TODO: Ace 1/11 handling
-    #       Make game-end condition disable buttons
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple)
     async def hit(self, interaction: discord.Interaction, button: discord.Button):
         # Deal new card to player
         self.PlayerState.deal()
 
         # Check for game-end condition
-        if sum(self.PlayerState.value) > 21:
-            self.condition = "**BUST!**"
-        elif sum(self.PlayerState.value) == 21:
-            self.condition = "**BLACKJACK!**"
+        self.checkGameCondition(self.PlayerState.value)
 
         # Add new card to hand display
         for card in self.PlayerState.hand:
@@ -129,6 +132,9 @@ class Controls(discord.ui.View):
         for card in self.DealerState.hand:
             self.cards_output += card
 
+        # Check for game-end condition
+        self.checkGameCondition(self.DealerState.value)
+
         # Update embed to reveal dealer's hidden card and hand value
         self.embed.set_field_at(index=0,
                                 name="Dealer's Hand",
@@ -149,6 +155,9 @@ class Controls(discord.ui.View):
             for card in self.DealerState.hand:
                 self.cards_output += card
 
+            # Check for game-end condition
+            self.checkGameCondition(self.DealerState.value)
+
             # Update embed with added card
             self.embed.set_field_at(index=0,
                                     name="Dealer's Hand",
@@ -159,7 +168,9 @@ class Controls(discord.ui.View):
             self.cards_output = ""
             await asyncio.sleep(0.5)
 
-        # Standing ends game, so disable buttons after
+        # Standing ends game, so clear states and disable buttons after
+        self.PlayerState = None
+        self.DealerState = None
         for child in self.children:
             child.disabled = True
         await self.response.edit(view=self)
