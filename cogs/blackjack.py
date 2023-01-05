@@ -117,6 +117,9 @@ class Controls(discord.ui.View):
         if self.condition != "":
             self.PlayerState = None
             self.DealerState = None
+            for child in self.children:
+                child.disabled = True
+            await self.response.edit(view=self)
             self.stop()
 
     # Stand to end game
