@@ -125,40 +125,41 @@ class Controls(discord.ui.View):
     # Stand to end game
     @discord.ui.button(label="Stand", style=discord.ButtonStyle.blurple)
     async def stand(self, interaction: discord.Interaction, button: discord.Button):
-        # Add new card to hand display
+        # Add cards to hand display
         for card in self.DealerState.hand:
             self.cards_output += card
 
+        # Update embed to reveal dealer's hidden card and hand value
         self.embed.set_field_at(index=0,
                                 name="Dealer's Hand",
                                 value=self.cards_output + " " + str(sum(self.DealerState.value)) + " " + self.condition)
         await interaction.response.edit_message(embed=self.embed)
+
         # Reset hand to display
         self.cards_output = ""
 
+        # Brief pause for "realism"
         await asyncio.sleep(0.5)
 
+        # Dealer gets another card if player stands and their hand is valued higher than dealer's revealed hand
         if sum(self.DealerState.value) < sum(self.PlayerState.value):
-            print("give dealer another card")
             self.DealerState.deal()
 
             # Add new card to hand display
             for card in self.DealerState.hand:
                 self.cards_output += card
-            print(self.cards_output)
-            try:
-                self.embed.set_field_at(index=0,
-                                        name="Dealer's Hand",
-                                        value=self.cards_output + " " + str(sum(self.DealerState.value)) + " " +
-                                        self.condition)
-                await interaction.edit_original_response(embed=self.embed)
-            except Exception as e:
-                print(e)
+
+            # Update embed with added card
+            self.embed.set_field_at(index=0,
+                                    name="Dealer's Hand",
+                                    value=self.cards_output + " " + str(sum(self.DealerState.value)) + " " +
+                                    self.condition)
+            await interaction.edit_original_response(embed=self.embed)
 
             self.cards_output = ""
-
             await asyncio.sleep(0.5)
 
+        # Standing ends game, so disable buttons after
         for child in self.children:
             child.disabled = True
         await self.response.edit(view=self)
