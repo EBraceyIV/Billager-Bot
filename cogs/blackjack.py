@@ -85,7 +85,6 @@ class Controls(discord.ui.View):
         self.embed = None
         self.DealerState = None
         self.PlayerState = None
-        self.winner = None
         self.condition = ""
         self.cards_output = ""
 
@@ -95,14 +94,6 @@ class Controls(discord.ui.View):
             self.condition = "**BUST!**"
         elif sum(_State_value) == 21:
             self.condition = "**BLACKJACK!**"
-
-    def checkWinner(self):
-        if sum(self.PlayerState.value) < sum(self.DealerState.value):
-            self.winner = "DEALER"
-        elif sum(self.PlayerState.value) == sum(self.DealerState.value):
-            pass
-        elif sum(self.PlayerState.value) > sum(self.DealerState.value):
-            self.winner = "PLAYER"
 
     def endGame(self):
         self.PlayerState = None
@@ -265,6 +256,10 @@ class Blackjack(commands.Cog, name="Blackjack"):
         if view.condition != "":
             view.hit.disabled = True
             view.stand.disabled = True
+            # Dealer's second card obscured to start
+            embed.insert_field_at(index=2,
+                                  name="YOU WIN!",
+                                  value="Counting cards pays off.")
 
         # Dealer's second card obscured to start
         embed.insert_field_at(index=0,
